@@ -1,0 +1,12 @@
+h1 {
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+#gameCanvas {
+    /* border: 2px solid #000000;
+    background-color: #dcc1ab; */
+    margin: 20px auto;
+    display: block;
+}
