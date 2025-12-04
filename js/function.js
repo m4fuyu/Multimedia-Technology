@@ -1,47 +1,226 @@
-//绘制地板
+// 初始化游戏
+function init(){
+    initLevel();
+}
+// 初始化游戏等级
+function initLevel(){
+    curMap = copyArray(levels[iCurlevel]);
+    curLevel = levels[iCurlevel];
+    
+    // 初始化朝向
+    currentFacing = "down"; 
+    curMan = down; // 默认图片
+
+    // 初始化打字状态
+    wordQueue = [];   
+    userTyping = "";  
+    
+    // 填满单词队列 (保持5个)
+    fillWordQueue();
+
+    InitMap(); // 绘制地板
+    DrawMap(curMap); // 绘制地图
+    // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
+    // 建议在 DrawMap 底部统一调用 drawSidebar
+}
+
+// 填充单词队列
+function fillWordQueue() {
+    while(wordQueue.length < 5) { 
+        // 传入当前关卡索引以获取对应难度单词
+        wordQueue.push(getRandomWord(iCurlevel));
+    }
+}
+// 绘制地板
 function InitMap(){
-    for (var i=0;i<16 ;i++ )
-    {
-        for (var j=0;j<16 ;j++ )
-        {
-            // ctx.drawImage(block,w*j,h*i,w,h);
+    for (var i=0;i<16 ;i++ ){
+        for (var j=0;j<16 ;j++ ){
             ctx.drawImage(block, offsetX + w*j, offsetY + h*i, w, h);
         }
     }
 }
 
+//绘制地图
 function DrawMap(level){
 	for (var i=0;i<level.length ;i++ )
 	{
 		for (var j=0;j<level[i].length ;j++ )
 		{
-			var pic = block;//初始图片
+			var pic = block;
 			switch (level[i][j])
 			{
-			case 1://绘制墙壁
-				pic = wall;
-				break;
-			case 2://绘制陷进
-				pic = ball;
-				break;
-			case 3://绘制箱子
-				pic = box;
-				break;
-			case 4://绘制小人
-				pic = curMan;//小人有四个方向 具体显示哪个图片需要和上下左右方位值关联
-				//获取小人的坐标位置
-				perPosition.x = i;
-				perPosition.y = j;
-				break;
-			case 5://绘制箱子及陷进位置
-				pic = box;
-				break;
+			case 1: pic = wall; break;
+			case 2: pic = ball; break;
+			case 3: pic = box; break;
+			case 4: 
+                pic = curMan; 
+                perPosition.x = i;
+                perPosition.y = j;
+                break;
+			case 5: pic = box; break;
 			}
-			//每个图片不一样宽 需要在对应地板的中心绘制地图
-			// ctx.drawImage(pic,w*j-(pic.width-w)/2,h*i-(pic.height-h),pic.width,pic.height);
             ctx.drawImage(pic, offsetX + w*j-(pic.width-w)/2, offsetY + h*i-(pic.height-h), pic.width, pic.height);
 		}
 	}
+// 【新增】每次重绘地图时，更新左侧的打字UI    
+    drawSidebar();
+}
+
+// 【新增】绘制左侧侧边栏 (单词队列 + 输入框)
+function drawSidebar() {
+    // 1. 清除侧边栏区域 (左侧 350px 宽)
+    ctx.fillStyle = "#dcc1ab"; // 使用背景色覆盖
+    ctx.fillRect(0, 0, 350, H);
+
+    // 2. 设置样式
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    let centerX = 180; // 侧边栏中心X
+    let bottomY = 600; // 单词柱底端Y位置
+
+    // 3. 绘制单词队列 (从下往上画)
+    // wordQueue[0] 是最下面的目标单词
+    for(let i = 0; i < wordQueue.length; i++) {
+        let word = wordQueue[i];
+        let yPos = bottomY - (i * 50); // 每个单词间隔50px
+        
+        // 目标单词 (index 0) 高亮显示
+        if(i === 0) {
+            ctx.font = "bold 32px Courier New";
+            ctx.fillStyle = "#A52A2A"; // 深红色
+        } else {
+            ctx.font = "24px Courier New";
+            ctx.fillStyle = "rgba(0,0,0,0.5)"; // 灰色
+        }
+        ctx.fillText(word, centerX, yPos);
+    }
+
+    // 4. 绘制输入框
+    let inputY = bottomY + 60;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(centerX - 100, inputY - 20, 200, 40); // 白底
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#000000";
+    ctx.strokeRect(centerX - 100, inputY - 20, 200, 40); // 黑框
+
+    // 5. 绘制用户当前的输入
+    ctx.font = "bold 28px Courier New";
+    ctx.fillStyle = "#000000";
+    ctx.fillText(userTyping, centerX, inputY);
+
+    // 6. 绘制操作提示
+    ctx.font = "16px sans-serif";
+    ctx.fillStyle = "#333";
+    ctx.fillText("输入单词移动 / 英文指令转向", centerX, inputY + 50);
+    ctx.fillText("Current Facing: " + currentFacing.toUpperCase(), centerX, inputY + 80);
+}
+
+// 【核心修改】键盘监听逻辑
+function doKeyDown(event){
+    let key = event.key; // 获取按键字符
+    let keyCode = event.keyCode;
+
+    // 1. 处理功能键
+    if (keyCode === 8) { // Backspace
+        userTyping = userTyping.slice(0, -1);
+        event.preventDefault(); // 防止浏览器后退
+    } 
+    else if (keyCode === 13) { // Enter
+        userTyping = "";
+    }
+    else if (key.length === 1 && /[a-zA-Z]/.test(key)) {
+        // 2. 处理字母输入
+        if (userTyping.length < 10) {
+            userTyping += key.toLowerCase();
+        }
+    } else {
+        // 忽略其他按键 (如 Ctrl, Shift 等)
+        return;
+    }
+
+    // 3. 实时检查逻辑
+    checkInputLogic();
+    
+    // 4. 重绘界面更新输入框显示
+    InitMap();
+    DrawMap(curMap);
+}
+
+// 【新增】检查输入内容执行指令
+function checkInputLogic() {
+    // A. 检查转向指令 (up, down, left, right)
+    const directions = ["up", "down", "left", "right"];
+    if (directions.includes(userTyping)) {
+        turnTo(userTyping); // 仅转向
+        userTyping = ""; // 清空输入
+        return;
+    }
+
+    // B. 检查是否匹配目标单词
+    let targetWord = wordQueue[0];
+    if (userTyping === targetWord) {
+        // 单词匹配成功 -> 向当前方向移动一格
+        moveForward();
+        
+        // 逻辑更新
+        userTyping = "";
+        wordQueue.shift(); // 移除已完成单词
+        fillWordQueue();   // 补充新单词
+    }
+}
+
+// 【新增】仅转向 (不移动坐标)
+function turnTo(dir) {
+    currentFacing = dir;
+    switch(dir) {
+        case "up": curMan = up; break;
+        case "down": curMan = down; break;
+        case "left": curMan = left; break;
+        case "right": curMan = right; break;
+    }
+    // 转向后立即刷新画面显示新朝向
+}
+
+// 【新增】向前移动 (基于当前朝向)
+function moveForward() {
+    let p1, p2;
+    // 根据当前朝向计算目标坐标
+    switch (currentFacing)
+    {
+    case "up":
+        p1 = new Point(perPosition.x-1, perPosition.y);
+        p2 = new Point(perPosition.x-2, perPosition.y);
+        break;
+    case "down":
+        p1 = new Point(perPosition.x+1, perPosition.y);
+        p2 = new Point(perPosition.x+2, perPosition.y);
+        break;
+    case "left":
+        p1 = new Point(perPosition.x, perPosition.y-1);
+        p2 = new Point(perPosition.x, perPosition.y-2);
+        break;
+    case "right":
+        p1 = new Point(perPosition.x, perPosition.y+1);
+        p2 = new Point(perPosition.x, perPosition.y+2);
+        break;
+    }
+
+    // 尝试移动
+    if (Trygo(p1, p2))
+    {
+        moveTimes++;
+        showMoveInfo();
+        
+        // 检查是否过关
+        if (checkFinish())
+        {
+            // 稍微延迟一下弹出，让画面先更新
+            setTimeout(() => {
+                alert("恭喜过关！！");
+                NextLevel(1);
+            }, 100);
+        }
+    }
 }
 
 function imgPreload(srcs,callback){
@@ -64,6 +243,8 @@ function imgPreload(srcs,callback){
 }
 
 
+
+//复制移动后的地图
 function copyArray(arr){
     var b=[];//每次移动更新地图数据都先清空再添加新的地图
     for (var i=0;i<arr.length ;i++ )
@@ -78,22 +259,6 @@ function Point(x,y){
     this.y = y;
 }
 
-//初始化游戏等级
-function initLevel(){
-    curMap = copyArray(levels[iCurlevel]);//当前移动过的游戏地图
-    curLevel = levels[iCurlevel];//当前等级的初始地图
-    curMan = down;//初始化小人
-    InitMap();//初始化地板
-    DrawMap(curMap);//绘制出当前等级的地图
-}
-
-//初始化游戏
-function init(){
-    //InitMap();
-    //DrawMap(levels[0]);
-    initLevel();//初始化对应等级的游戏
-    //showMoveInfo();//初始化对应等级的游戏数据
-}
 
 
 //下一关
@@ -116,51 +281,6 @@ function NextLevel(i){
 }
 
 
-
-//小人移动
-function go(dir){
-    var p1,p2;
-    switch (dir)
-    {
-    case "up":
-        curMan = up;
-        //获取小人前面的两个坐标位置来进行判断小人是否能够移动
-        p1 = new Point(perPosition.x-1,perPosition.y);
-        p2 = new Point(perPosition.x-2,perPosition.y);
-        break;
-    case "down":
-        curMan = down;
-        p1 = new Point(perPosition.x+1,perPosition.y);
-        p2 = new Point(perPosition.x+2,perPosition.y);
-        break;
-    case "left":
-        curMan = left;
-        p1 = new Point(perPosition.x,perPosition.y-1);
-        p2 = new Point(perPosition.x,perPosition.y-2);
-        break;
-    case "right":
-        curMan = right;
-        p1 = new Point(perPosition.x,perPosition.y+1);
-        p2 = new Point(perPosition.x,perPosition.y+2);
-        break;
-    }
-    //若果小人能够移动的话，更新游戏数据，并重绘地图
-    if (Trygo(p1,p2))
-    {
-        moveTimes ++;
-        showMoveInfo();
-    }
-    //重绘地板
-    InitMap();
-    //重绘当前更新了数据的地图
-    DrawMap(curMap);
-    //若果移动完成了进入下一关
-    if (checkFinish())
-    {
-        alert("恭喜过关！！");
-        NextLevel(1);
-    }
-}
 //判断是否推成功
 function checkFinish(){
     for (var i=0;i<curMap.length ;i++ )
@@ -218,26 +338,7 @@ function Trygo(p1,p2){
 //判断是否推成功
 
 
-//与键盘上的上下左右键关联
-function doKeyDown(event){
-    switch (event.keyCode)
-    {
-    case 37://左键头
-        go("left");
-        break;
-    case 38://上键头
-        go("up");
-        break;
-    case 39://右箭头
-        go("right");
-        break;
-    case 40://下箭头
-        go("down");
-        break;
-    }
-
-}
-
+//msg
 function showMoveInfo(){
     msg.innerHTML = "第" + (iCurlevel+1) +"关 移动次数: "+ moveTimes;
 }
