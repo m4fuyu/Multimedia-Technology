@@ -8,7 +8,7 @@ let ctx = canvas.getContext("2d");
 let W = canvas.width;
 let H = canvas.height;
 let offsetX = 360; // 水平居中偏移量 (1280-560)/2 = 360
-let offsetY = 100; // 垂直偏移量（标题下方）
+let offsetY = 150; // 垂直偏移量（标题下方）
 let w = 35,h = 35; // 单位方块大小
 let curMap;//当前的地图
 let curLevel;//当前等级的地图
@@ -36,7 +36,7 @@ ctx.fillRect(0, 0, W, H);
 ctx.fillStyle = "#000000";
 ctx.font='64px sans-serif';
 ctx.textAlign='center';
-ctx.fillText("推箱子", W/2, H/2 -320);
+ctx.fillText("银山推箱子", W/2, H/2 -320);
 
 
 //

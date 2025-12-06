@@ -20,13 +20,14 @@ function initLevel(){
 
     InitMap(); // 绘制地板
     DrawMap(curMap); // 绘制地图
+    showMoveInfo();
     // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
     // 建议在 DrawMap 底部统一调用 drawSidebar
 }
 
 // 填充单词队列
 function fillWordQueue() {
-    while(wordQueue.length < 5) { 
+    while(wordQueue.length < 10) { 
         // 传入当前关卡索引以获取对应难度单词
         wordQueue.push(getRandomWord(iCurlevel));
     }
@@ -69,13 +70,13 @@ function DrawMap(level){
 // 【新增】绘制左侧侧边栏 (单词队列 + 输入框)
 function drawSidebar() {
     // 1. 清除侧边栏区域 (左侧 350px 宽)
-    ctx.fillStyle = "#dcc1ab"; // 使用背景色覆盖
-    ctx.fillRect(0, 0, 350, H);
+    ctx.fillStyle = "#5e89c9ff"; // 使用背景色覆盖
+    ctx.fillRect(0, 0, 300, H);
 
     // 2. 设置样式
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    let centerX = 180; // 侧边栏中心X
+    let centerX = 150; // 侧边栏中心X
     let bottomY = 600; // 单词柱底端Y位置
 
     // 3. 绘制单词队列 (从下往上画)
@@ -338,7 +339,12 @@ function Trygo(p1,p2){
 //判断是否推成功
 
 
-//msg
+//draw hit info
 function showMoveInfo(){
-    msg.innerHTML = "第" + (iCurlevel+1) +"关 移动次数: "+ moveTimes;
+    ctx.fillStyle = "#ababdcff";
+    ctx.fillRect(1280-300, 0, W, H);
+    ctx.fillStyle = "#000000";
+    ctx.font='36px sans-serif';
+    ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
+    ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
 }
