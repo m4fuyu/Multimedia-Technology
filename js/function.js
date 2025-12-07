@@ -2,7 +2,7 @@
 function init(){
     initLevel();
 }
-// 初始化游戏等级
+// 初始化游戏关卡
 function initLevel(){
     curMap = copyArray(levels[iCurlevel]);
     curLevel = levels[iCurlevel];
@@ -13,16 +13,25 @@ function initLevel(){
 
     // 初始化打字状态
     wordQueue = [];   
-    userTyping = "";  
+    userTyping = "";
+    moveTimes = 0;
     
-    // 填满单词队列 (保持5个)
+    // 填满单词队列 (保持10个)
     fillWordQueue();
-
-    InitMap(); // 绘制地板
-    DrawMap(curMap); // 绘制地图
-    showMoveInfo();
+    reflashScreen(); // 绘制地图和侧边栏
+    
     // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
     // 建议在 DrawMap 底部统一调用 drawSidebar
+}
+
+// 刷新屏幕显示
+function reflashScreen(){
+    InitMap();
+    DrawMap(curMap);
+    showMoveInfo();
+    drawButton(buttonNext);
+    drawButton(buttonPre);
+    drawButton(buttonReset);
 }
 
 // 填充单词队列
@@ -143,8 +152,7 @@ function doKeyDown(event){
     checkInputLogic();
     
     // 4. 重绘界面更新输入框显示
-    InitMap();
-    DrawMap(curMap);
+    reflashScreen();
 }
 
 // 【新增】检查输入内容执行指令
@@ -276,9 +284,8 @@ function NextLevel(i){
     {
         iCurlevel = len-1;
     }
-    initLevel();//初始当前等级关卡
     moveTimes = 0;//游戏关卡移动步数清零
-    showMoveInfo();//初始化当前关卡数据
+    initLevel();//初始当前等级关卡
 }
 
 
@@ -347,4 +354,52 @@ function showMoveInfo(){
     ctx.font='36px sans-serif';
     ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
     ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
+}
+
+// 绘制按钮
+function drawButton(button){
+    // 绘制矩形
+    ctx.fillStyle = button.color;
+    // fillRect(x, y, width, height)
+    ctx.fillRect(button.x, button.y, button.width, button.height);
+
+    // 绘制按钮文本
+    ctx.fillStyle = '#ffffff'; // 白色文本
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // 计算文本中心位置
+    const textX = button.x + button.width / 2;
+    const textY = button.y + button.height / 2;
+    
+    ctx.fillText(button.text, textX, textY);
+}
+
+// 检查点击坐标是否在按钮区域内
+function isButtonClicked(clickX, clickY,button) {
+    return (
+        clickX >= button.x &&
+        clickX <= button.x + button.width &&
+        clickY >= button.y &&
+        clickY <= button.y + button.height
+    );
+}
+
+function handleButtonNextClick(){
+    if (iCurlevel >= levels.length - 1) {
+        alert("已经是最后一关了！");
+        return;
+    }
+    NextLevel(1);
+}
+function handleButtonPreClick(){
+    if (iCurlevel <= 0) {
+        alert("已经是第一关了！");
+        return;
+    }
+    NextLevel(-1);
+}
+function handleButtonResetClick(){
+    initLevel();
 }

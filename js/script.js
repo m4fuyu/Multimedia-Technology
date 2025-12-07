@@ -17,6 +17,11 @@ let iCurlevel = 0;//关卡数
 let moveTimes = 0;//移动了多少次
 let perPosition = new Point(5,5);//小人的位置
 
+let curWordBank = []; // 当前关卡使用的单词库
+let wordQueue = [];   // 单词队列
+let userTyping = "";  // 用户输入
+let currentFacing = "down"; // 朝向
+
 // 加载图片地址
 let oImgs = {
     "block" : "image/block.gif",
@@ -29,6 +34,32 @@ let oImgs = {
     "right" : "image/right.png",
 }
 
+const buttonNext = {
+    x: 1280-100,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '下一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonPre = {
+    x: 1280-300,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '上一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonReset = {
+    x: 1280-200,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '重置关卡',
+    color: '#007bff' // 蓝色
+};
 
 // 绘制背景
 ctx.fillStyle = "#dcc1ab";
@@ -39,7 +70,7 @@ ctx.textAlign='center';
 ctx.fillText("银山推箱子", W/2, H/2 -320);
 
 
-//
+//预加载图片
 let block,wall,box,ball,up,down,left,right;
 imgPreload(oImgs,function(images){
     //console.log(images.block);
@@ -56,10 +87,23 @@ imgPreload(oImgs,function(images){
 
 //捕获用户上下左右移动
 document.addEventListener('keydown', doKeyDown);
+canvas.addEventListener('click', function(event) {
+    // 1. 获取点击在 Canvas 上的相对坐标
+    // getBoundingClientRect() 返回 Canvas 相对于视口的位置
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
 
-let curWordBank = []; // 当前关卡使用的单词库
-let wordQueue = [];   // 单词队列
-let userTyping = "";  // 用户输入
-let currentFacing = "down"; // 朝向
+    // 2. 检查点击是否在按钮范围内
+    if (isButtonClicked(clickX, clickY, buttonNext)) {
+        // 3. 触发事件
+        handleButtonNextClick();
+    }else if (isButtonClicked(clickX, clickY, buttonPre)) {
+        handleButtonPreClick();
+    }else if (isButtonClicked(clickX, clickY, buttonReset)) {
+        handleButtonResetClick();
+    }
+});
+
 
 
