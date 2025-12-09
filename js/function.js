@@ -1,7 +1,3 @@
-// 初始化游戏
-function init(){
-    initLevel();
-}
 // 初始化游戏关卡
 function initLevel(){
     curMap = copyArray(levels[iCurlevel]);
@@ -403,4 +399,15 @@ function handleButtonPreClick(){
 }
 function handleButtonResetClick(){
     initLevel();
+}
+
+// 获取随机单词
+function getRandomWord(levelIndex) {
+    let list = wordList;
+    // 如果该关卡有配置特定单词，则使用特定单词
+    if(wordLevels[levelIndex]) {
+        list = wordLevels[levelIndex];
+    }
+    let randIndex = Math.floor(Math.random() * list.length);
+    return list[randIndex];
 }

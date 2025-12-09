@@ -82,7 +82,7 @@ imgPreload(oImgs,function(images){
     down = images.down;
     left = images.left;
     right = images.right;
-    init();
+    initLevel();
 });
 
 //捕获用户上下左右移动
