@@ -29,6 +29,7 @@ function reflashScreen(){
     InitMap();
     DrawMap(curMap);
     showMoveInfo();
+    drawSidebar();
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
@@ -73,7 +74,7 @@ function DrawMap(level){
 		}
 	}
 // 【新增】每次重绘地图时，更新左侧的打字UI    
-    drawSidebar();
+    
 }
 
 // 【新增】绘制左侧侧边栏 (单词队列 + 输入框)
