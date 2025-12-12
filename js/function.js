@@ -18,6 +18,10 @@ function initLevel(){
     
     // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
     // 建议在 DrawMap 底部统一调用 drawSidebar
+    if (typeof window.gameLoopStarted === 'undefined') {
+        window.gameLoopStarted = true;
+        setTimeout(() => gameLoop(), 500);
+    }
 }
 
 // 刷新屏幕显示
@@ -29,6 +33,7 @@ function reflashScreen(){
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
+    wordSprite.update();
 }
 
 // 填充单词队列
@@ -92,14 +97,17 @@ function drawSidebar() {
         let yPos = bottomY - (i * 50); // 每个单词间隔50px
         
         // 目标单词 (index 0) 高亮显示
-        if(i === 0) {
-            ctx.font = "bold 32px Courier New";
-            ctx.fillStyle = "#A52A2A"; // 深红色
-        } else {
-            ctx.font = "24px Courier New";
-            ctx.fillStyle = "rgba(0,0,0,0.5)"; // 灰色
-        }
-        ctx.fillText(word, centerX, yPos);
+    if(i === 0) {
+        // 使用精灵动画的字体大小
+        wordSprite.update();
+        ctx.font = `bold ${Math.round(wordSprite.currentFontSize)}px Courier New`;
+        ctx.fillStyle = "#A52A2A";
+
+    } else {
+        ctx.font = "24px Courier New";
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+    }
+    ctx.fillText(word, centerX, yPos);
     }
 
     // 4. 绘制输入框
@@ -190,6 +198,8 @@ function checkInputLogic() {
         userTyping = "";
         wordQueue.shift(); // 移除已完成单词
         fillWordQueue();   // 补充新单词
+        // 重置强调动画
+        wordSprite.reset();
     }
 }
 
@@ -425,4 +435,11 @@ function getRandomWord(levelIndex) {
     }
     let randIndex = Math.floor(Math.random() * list.length);
     return list[randIndex];
+}
+
+// 游戏主循环
+function gameLoop() {
+    wordSprite.update();
+    drawSidebar(); // 只重绘侧边栏，避免闪烁
+    requestAnimationFrame(gameLoop);
 }

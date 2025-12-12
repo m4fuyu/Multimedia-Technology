@@ -33,7 +33,33 @@ let oImgs = {
     "left" : "image/left.png",
     "right" : "image/right.png",
 }
+// 单词精灵
+let wordSprite = {
+    emphasized: true,
+    baseFontSize: 32,
+    currentFontSize: 32,
+    minSize: 28,
+    maxSize: 80,
+    animationSpeed: 0.03,
+    time: 0,
 
+    update: function() {
+        if (!this.emphasized) return;
+        
+        this.time += this.animationSpeed;
+        console.log('time:', this.time, 'fontSize:', this.currentFontSize); // 调试输出
+        
+        // 使用正弦函数实现平滑的大小循环
+        let scale = 1 + Math.sin(this.time) * 0.15;
+        this.currentFontSize = this.baseFontSize * scale;
+        this.currentFontSize = Math.max(this.minSize, Math.min(this.maxSize, this.currentFontSize));
+    },
+    
+    reset: function() {
+        this.time = 0;
+        this.currentFontSize = this.baseFontSize;
+    }
+};  
 const buttonNext = {
     x: 1280-100,
     y: 800-50,
