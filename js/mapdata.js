@@ -1,4 +1,4 @@
-var levels=[];
+let levels=[];
 //1 = 墙
 //2 = 目标点
 //3 = 箱子

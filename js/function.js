@@ -152,6 +152,24 @@ function doKeyDown(event){
     reflashScreen();
 }
 
+function doClick(event) {
+    // 1. 获取点击在 Canvas 上的相对坐标
+    // getBoundingClientRect() 返回 Canvas 相对于视口的位置
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    // 2. 检查点击是否在按钮范围内
+    if (isButtonClicked(clickX, clickY, buttonNext)) {
+        // 3. 触发事件
+        handleButtonNextClick();
+    }else if (isButtonClicked(clickX, clickY, buttonPre)) {
+        handleButtonPreClick();
+    }else if (isButtonClicked(clickX, clickY, buttonReset)) {
+        initLevel();
+    }
+}
+
 // 【新增】检查输入内容执行指令
 function checkInputLogic() {
     // A. 检查转向指令 (up, down, left, right)
@@ -397,16 +415,13 @@ function handleButtonPreClick(){
     }
     NextLevel(-1);
 }
-function handleButtonResetClick(){
-    initLevel();
-}
 
 // 获取随机单词
 function getRandomWord(levelIndex) {
-    let list = wordList;
+    let list = curlevelword;
     // 如果该关卡有配置特定单词，则使用特定单词
-    if(wordLevels[levelIndex]) {
-        list = wordLevels[levelIndex];
+    if(curlevelword[levelIndex]) {
+        list = curlevelword[levelIndex];
     }
     let randIndex = Math.floor(Math.random() * list.length);
     return list[randIndex];

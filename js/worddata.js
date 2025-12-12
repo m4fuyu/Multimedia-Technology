@@ -40,7 +40,7 @@ const wordList = [
 ];
 
 // 每一关特定的词库（可选，如果没有配置则使用默认 wordList）
-const wordLevels = [
+const curlevelword = [
     // 第1关专用词
     ["good", "morning", "hi", "hello", "afternoon", "evening", "how", "are", "you", "i",
 "am", "fine", "thanks", "ok","what", "is", "this", "in", "english", "map", "cup", "ruler", "pen", "orange",

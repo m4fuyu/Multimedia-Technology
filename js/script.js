@@ -87,23 +87,7 @@ imgPreload(oImgs,function(images){
 
 //捕获用户上下左右移动
 document.addEventListener('keydown', doKeyDown);
-canvas.addEventListener('click', function(event) {
-    // 1. 获取点击在 Canvas 上的相对坐标
-    // getBoundingClientRect() 返回 Canvas 相对于视口的位置
-    const rect = canvas.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
-
-    // 2. 检查点击是否在按钮范围内
-    if (isButtonClicked(clickX, clickY, buttonNext)) {
-        // 3. 触发事件
-        handleButtonNextClick();
-    }else if (isButtonClicked(clickX, clickY, buttonPre)) {
-        handleButtonPreClick();
-    }else if (isButtonClicked(clickX, clickY, buttonReset)) {
-        handleButtonResetClick();
-    }
-});
+canvas.addEventListener('click', doClick);
 
 
 
