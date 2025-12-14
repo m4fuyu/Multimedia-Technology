@@ -127,7 +127,7 @@ function drawSidebar() {
     ctx.font = "16px sans-serif";
     ctx.fillStyle = "#333";
     ctx.fillText("输入单词移动 / 英文指令转向", centerX, inputY + 50);
-    ctx.fillText("Current Facing: " + currentFacing.toUpperCase(), centerX, inputY + 80);
+    ctx.fillText("当前朝向: " + currentFacing.toUpperCase(), centerX, inputY + 80);
 }
 
 // 【核心修改】键盘监听逻辑
@@ -441,5 +441,5 @@ function getRandomWord(levelIndex) {
 function gameLoop() {
     wordSprite.update();
     drawSidebar(); // 只重绘侧边栏，避免闪烁
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(gameLoop);//
 }
