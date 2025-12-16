@@ -33,7 +33,7 @@ function reflashScreen(){
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
-    wordSprite.update();
+    wordSprite.scale();
 }
 
 // 填充单词队列
@@ -99,7 +99,7 @@ function drawSidebar() {
         // 目标单词 (index 0) 高亮显示
     if(i === 0) {
         // 使用精灵动画的字体大小
-        wordSprite.update();
+        wordSprite.scale();
         ctx.font = `bold ${Math.round(wordSprite.currentFontSize)}px Courier New`;
         ctx.fillStyle = "#A52A2A";
 
@@ -439,7 +439,7 @@ function getRandomWord(levelIndex) {
 
 // 游戏主循环
 function gameLoop() {
-    wordSprite.update();
+    wordSprite.scale();
     drawSidebar(); // 只重绘侧边栏，避免闪烁
-    requestAnimationFrame(gameLoop);//
+    requestAnimationFrame(gameLoop);
 }

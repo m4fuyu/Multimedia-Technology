@@ -5,8 +5,6 @@ h1 {
     justify-content: center;
 }
 #gameCanvas {
-    /* border: 2px solid #000000;
-    background-color: #dcc1ab; */
     margin: 20px auto;
     display: block;
 }

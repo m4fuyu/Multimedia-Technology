@@ -43,7 +43,7 @@ let wordSprite = {
     animationSpeed: 0.03,
     time: 0,
 
-    update: function() {
+    scale: function() {
         if (!this.emphasized) return;
         
         this.time += this.animationSpeed;
@@ -99,7 +99,7 @@ ctx.fillText("银山推箱子", W/2, H/2 -320);
 //预加载图片
 let block,wall,box,ball,up,down,left,right;
 imgPreload(oImgs,function(images){
-    //console.log(images.block);
+    console.log(images.block);
     block = images.block;
     wall = images.wall;
     box = images.box;
