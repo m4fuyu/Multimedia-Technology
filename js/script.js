@@ -35,7 +35,6 @@ let oImgs = {
 }
 // 单词精灵
 let wordSprite = {
-    emphasized: true,
     baseFontSize: 32,
     currentFontSize: 32,
     minSize: 28,
@@ -44,10 +43,9 @@ let wordSprite = {
     time: 0,
 
     scale: function() {
-        if (!this.emphasized) return;
         
         this.time += this.animationSpeed;
-        console.log('time:', this.time, 'fontSize:', this.currentFontSize); // 调试输出
+        // console.log('time:', this.time, 'fontSize:', this.currentFontSize); // 调试输出
         
         // 使用正弦函数实现平滑的大小循环
         let scale = 1 + Math.sin(this.time) * 0.15;
@@ -99,7 +97,6 @@ ctx.fillText("银山推箱子", W/2, H/2 -320);
 //预加载图片
 let block,wall,box,ball,up,down,left,right;
 imgPreload(oImgs,function(images){
-    console.log(images.block);
     block = images.block;
     wall = images.wall;
     box = images.box;
@@ -108,6 +105,15 @@ imgPreload(oImgs,function(images){
     down = images.down;
     left = images.left;
     right = images.right;
+// console.log("images/block.png:", images.block.complete ? "加载成功" : "加载失败");
+// console.log("images/wall.png:", images.wall.complete ? "加载成功" : "加载失败");
+// console.log("images/box.png:", images.box.complete ? "加载成功" : "加载失败");
+// console.log("images/ball.png:", images.ball.complete ? "加载成功" : "加载失败");
+// console.log("images/up.png:", images.up.complete ? "加载成功" : "加载失败");
+// console.log("images/down.png:", images.down.complete ? "加载成功" : "加载失败");
+// console.log("images/left.png:", images.left.complete ? "加载成功" : "加载失败");
+// console.log("images/right.png:", images.right.complete ? "加载成功" : "加载失败");
+
     initLevel();
 });
 

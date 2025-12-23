@@ -28,8 +28,8 @@ function initLevel(){
 function reflashScreen(){
     InitMap();
     DrawMap(curMap);
-    showMoveInfo();
     drawSidebar();
+    showMoveInfo();
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
@@ -178,7 +178,7 @@ function doClick(event) {
     }
 }
 
-// 【新增】检查输入内容执行指令
+//检查输入内容执行指令
 function checkInputLogic() {
     // A. 检查转向指令 (up, down, left, right)
     const directions = ["up", "down", "left", "right"];
@@ -203,7 +203,7 @@ function checkInputLogic() {
     }
 }
 
-// 【新增】仅转向 (不移动坐标)
+//仅转向 (不移动坐标)
 function turnTo(dir) {
     currentFacing = dir;
     switch(dir) {
@@ -224,18 +224,22 @@ function moveForward() {
     case "up":
         p1 = new Point(perPosition.x-1, perPosition.y);
         p2 = new Point(perPosition.x-2, perPosition.y);
+        console.log(p1, p2);
         break;
     case "down":
         p1 = new Point(perPosition.x+1, perPosition.y);
         p2 = new Point(perPosition.x+2, perPosition.y);
+        console.log(p1, p2);
         break;
     case "left":
         p1 = new Point(perPosition.x, perPosition.y-1);
         p2 = new Point(perPosition.x, perPosition.y-2);
+        console.log(p1, p2);
         break;
     case "right":
         p1 = new Point(perPosition.x, perPosition.y+1);
         p2 = new Point(perPosition.x, perPosition.y+2);
+        console.log(p1, p2);
         break;
     }
 
@@ -354,7 +358,7 @@ function Trygo(p1,p2){
     var v = curLevel[perPosition.x][perPosition.y];
     if (v!=2)//若果刚开始小人位置不是陷进的话
     {
-        if (v==5)//可能是5 既有箱子又陷进
+        if (v==5)//箱子与目标点
         {
             v=2;//若果小人本身就在陷进里面的话移开之后还是显示陷进
         }else{
@@ -385,7 +389,6 @@ function showMoveInfo(){
 function drawButton(button){
     // 绘制矩形
     ctx.fillStyle = button.color;
-    // fillRect(x, y, width, height)
     ctx.fillRect(button.x, button.y, button.width, button.height);
 
     // 绘制按钮文本
