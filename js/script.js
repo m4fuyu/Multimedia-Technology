@@ -17,8 +17,9 @@ let iCurlevel = 0;//关卡数
 let moveTimes = 0;//移动了多少次
 let perPosition = new Point(5,5);//小人的位置
 
-let curWordBank = []; // 当前关卡使用的单词库
-let wordQueue = [];   // 单词队列
+let questionQueue = [];   // 题目队列（替代wordQueue）
+let currentQuestionIndex = 0; // 当前题目索引
+let answeredQuestions = []; // 已完成的题目历史
 let userTyping = "";  // 用户输入
 let currentFacing = "down"; // 朝向
 
@@ -33,22 +34,18 @@ let oImgs = {
     "left" : "image/left.png",
     "right" : "image/right.png",
 }
-// 单词精灵
-let wordSprite = {
-    baseFontSize: 32,
-    currentFontSize: 32,
-    minSize: 28,
-    maxSize: 80,
+// 题目高亮动画精灵（用于当前题目的强调效果）
+let questionSprite = {
+    baseFontSize: 18,
+    currentFontSize: 18,
+    minSize: 16,
+    maxSize: 22,
     animationSpeed: 0.03,
     time: 0,
 
     scale: function() {
-        
         this.time += this.animationSpeed;
-        // console.log('time:', this.time, 'fontSize:', this.currentFontSize); // 调试输出
-        
-        // 使用正弦函数实现平滑的大小循环
-        let scale = 1 + Math.sin(this.time) * 0.15;
+        let scale = 1 + Math.sin(this.time) * 0.1;
         this.currentFontSize = this.baseFontSize * scale;
         this.currentFontSize = Math.max(this.minSize, Math.min(this.maxSize, this.currentFontSize));
     },
