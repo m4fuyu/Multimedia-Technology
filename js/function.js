@@ -17,6 +17,11 @@ function initLevel(){
     fillQuestionQueue();
     reflashScreen(); // 绘制地图和侧边栏
     
+    // 初始化通关提示动画
+    if (typeof hintSprite !== 'undefined') {
+        hintSprite.setLevel(iCurlevel);
+    }
+
     // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
     // 建议在 DrawMap 底部统一调用 drawSidebar
     if (typeof window.gameLoopStarted === 'undefined') {
@@ -539,6 +544,13 @@ function handleButtonPreClick(){
 // 游戏主循环
 function gameLoop() {
     questionSprite.scale();
+    
+    // 更新并绘制通关提示动画
+    if (typeof hintSprite !== 'undefined') {
+        hintSprite.update();
+        hintSprite.draw();
+    }
+
     drawSidebar(); // 只重绘侧边栏，避免闪烁
     requestAnimationFrame(gameLoop);
 }

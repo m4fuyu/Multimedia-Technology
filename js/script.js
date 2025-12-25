@@ -33,7 +33,70 @@ let oImgs = {
     "down" : "image/down.png",
     "left" : "image/left.png",
     "right" : "image/right.png",
+    "level1_ans" : "image/level1_ans.png"
 }
+// 全局存储加载的图片对象
+let loadedImages = {};
+
+// 提示动画精灵对象
+let hintSprite = {
+    x: 990, // 右侧栏起始980，宽度300。居中：980 + (300-280)/2 = 990
+    y: 220, // 避开上方的文字信息
+    width: 280,
+    height: 0, 
+    frameWidth: 945,
+    currentFrame: 0,
+    totalFrames: 0,
+    tickCount: 0,
+    ticksPerFrame: 64, 
+    image: null,
+
+    setLevel: function(levelIndex) {
+        // 根据关卡索引获取对应的提示图片 key (例如 level1_ans)
+        let key = "level" + (levelIndex + 1) + "_ans";
+        if (loadedImages && loadedImages[key]) {
+            this.image = loadedImages[key];
+            this.totalFrames = Math.floor(this.image.width / this.frameWidth);
+            this.currentFrame = 0;
+            // 计算显示高度 (保持宽高比)
+            let ratio = this.width / this.frameWidth;
+            this.height = this.image.height * ratio;
+        } else {
+            this.image = null;
+        }
+    },
+
+    update: function() {
+        if (!this.image || this.totalFrames <= 1) return;
+        this.tickCount++;
+        if (this.tickCount > this.ticksPerFrame) {
+            this.tickCount = 0;
+            this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
+        }
+    },
+
+    draw: function() {
+        if (!this.image) return;
+        
+        // 2. 绘制标题
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        // 右侧栏中心 x = 980 + 150 = 1130
+        ctx.fillText("通关提示", 1130, this.y - 10);
+
+        // 3. 绘制当前帧
+        ctx.drawImage(
+            this.image,
+            this.currentFrame * this.frameWidth, 0, // 源图像坐标 (sx, sy)
+            this.frameWidth, this.image.height,     // 源图像尺寸 (sw, sh)
+            this.x, this.y,                         // 目标坐标 (dx, dy)
+            this.width, this.height                 // 目标尺寸 (dw, dh)
+        );
+    }
+};
+
 // 题目高亮动画精灵（用于当前题目的强调效果）
 let questionSprite = {
     baseFontSize: 18,
@@ -94,6 +157,7 @@ ctx.fillText("银山推箱子", W/2, H/2 -320);
 //预加载图片
 let block,wall,box,ball,up,down,left,right;
 imgPreload(oImgs,function(images){
+    loadedImages = images; // 保存加载的图片引用
     block = images.block;
     wall = images.wall;
     box = images.box;
