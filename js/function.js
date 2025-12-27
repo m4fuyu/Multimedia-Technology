@@ -15,7 +15,7 @@ function initLevel(){
     
     // 填满题目队列 (保持5-10个题目)
     fillQuestionQueue();
-    reflashScreen(); // 绘制地图和侧边栏
+    // reflashScreen(); // 绘制地图和侧边栏
     
     // 初始化通关提示动画
     if (typeof hintSprite !== 'undefined') {
@@ -26,12 +26,16 @@ function initLevel(){
     // 建议在 DrawMap 底部统一调用 drawSidebar
     if (typeof window.gameLoopStarted === 'undefined') {
         window.gameLoopStarted = true;
-        setTimeout(() => gameLoop(), 500);
+        reflashScreen();
     }
 }
 
-// 刷新屏幕显示
+// 刷新屏幕显示 (兼游戏主循环)
 function reflashScreen(){
+    // 1. 清除背景 (防止文字重叠)
+    ctx.fillStyle = "#dcc1ab";
+    ctx.fillRect(0, 0, W, H);
+
     // 绘制标题
     ctx.fillStyle = "#000000";
     ctx.font='64px sans-serif';
@@ -43,9 +47,23 @@ function reflashScreen(){
     DrawMap(curMap);
     drawSidebar();
     showMoveInfo();
+    
+    // 更新并绘制通关提示动画
+
+    hintSprite.update();
+    hintSprite.draw();
+
+
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
+
+    // 更新并绘制浮动文本
+
+    updateAndDrawFloatingTexts();
+    
+
+    requestAnimationFrame(reflashScreen);
 }
 
 // 填充题目队列
@@ -261,7 +279,7 @@ function doKeyDown(event){
     checkInputLogic();
     
     // 4. 重绘界面更新输入框显示
-    reflashScreen();
+    // reflashScreen(); // 由主循环处理
 }
 
 function doClick(event) {
@@ -510,6 +528,11 @@ function showMoveInfo(){
     ctx.font='36px sans-serif';
     ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
     ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("通关提示", 1130, 210);
 }
 
 // 绘制按钮
@@ -558,27 +581,7 @@ function handleButtonPreClick(clickX, clickY){
     NextLevel(-1);
 }
 
-// 游戏主循环
-function gameLoop() {
-    // 1. 清除背景 (防止文字重叠)
-    ctx.fillStyle = "#dcc1ab";
-    ctx.fillRect(0, 0, W, H);
 
-    // 2. 绘制游戏基础画面 (地图、侧边栏、按钮等)
-    // 注意：reflashScreen 内部调用了 questionSprite.scale()
-    reflashScreen(); 
-    
-    // 3. 更新并绘制通关提示动画
-    if (typeof hintSprite !== 'undefined') {
-        hintSprite.update();
-        hintSprite.draw();
-    }
-
-    // 4. 更新并绘制浮动文本
-    updateAndDrawFloatingTexts(); 
-    
-    requestAnimationFrame(gameLoop);
-}
 
 function updateAndDrawFloatingTexts(){
     for(let i = 0; i < floatingTexts.length; i++){

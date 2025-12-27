@@ -113,13 +113,7 @@ let hintSprite = {
     draw: function() {
         if (!this.image) return;
         
-        // 2. 绘制标题
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        // 右侧栏中心 x = 980 + 150 = 1130
-        ctx.fillText("通关提示", 1130, this.y - 10);
+
 
         // 3. 绘制当前帧
         ctx.drawImage(
