@@ -23,7 +23,20 @@ let answeredQuestions = []; // 已完成的题目历史
 let userTyping = "";  // 用户输入
 let currentFacing = "down"; // 朝向
 
-// 加载图片地址
+// 存储所有活跃的浮动文字
+let floatingTexts = [];
+
+// 浮动文字对象构造函数
+function FloatingText(x, y, text) {
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.life = 2.0; // 生命值/透明度 (2.0 -> 0.0)
+    this.speed = 2;  // 向上飘的速度
+    this.color = "#00D1CE"; // 文字颜色
+}
+
+// 加载图片地址2
 let oImgs = {
     "block" : "image/block.gif",
     "wall" : "image/wall.png",
@@ -35,6 +48,28 @@ let oImgs = {
     "right" : "image/right.png",
     "level1_ans" : "image/level1_ans.png"
 }
+
+// 音效对象
+let sounds = {
+    move: new Audio("sound/move.mp3"),
+    coin_recived: new Audio("sound/coin_recieved.mp3"),
+    button_click: new Audio("sound/button_click.mp3"),
+    typing: new Audio("sound/typing.mp3")
+};
+
+// 设置音量
+sounds.move.volume = 1;         // 移动音效调小
+sounds.coin_recived.volume = 0.2; // 进洞音效适中
+sounds.button_click.volume = 0.5; // 按钮音效适中
+
+// 播放音效的辅助函数
+function playSound(name) {
+    if (sounds[name]) {
+        sounds[name].currentTime = 0; // 重置播放进度，支持快速连续播放
+        sounds[name].play().catch(e => console.log("Audio play failed:", e));
+    }
+}
+
 // 全局存储加载的图片对象
 let loadedImages = {};
 
@@ -97,27 +132,7 @@ let hintSprite = {
     }
 };
 
-// 题目高亮动画精灵（用于当前题目的强调效果）
-let questionSprite = {
-    baseFontSize: 18,
-    currentFontSize: 18,
-    minSize: 16,
-    maxSize: 22,
-    animationSpeed: 0.03,
-    time: 0,
 
-    scale: function() {
-        this.time += this.animationSpeed;
-        let scale = 1 + Math.sin(this.time) * 0.1;
-        this.currentFontSize = this.baseFontSize * scale;
-        this.currentFontSize = Math.max(this.minSize, Math.min(this.maxSize, this.currentFontSize));
-    },
-    
-    reset: function() {
-        this.time = 0;
-        this.currentFontSize = this.baseFontSize;
-    }
-};  
 const buttonNext = {
     x: 1280-100,
     y: 800-50,
@@ -144,6 +159,8 @@ const buttonReset = {
     text: '重置关卡',
     color: '#007bff' // 蓝色
 };
+
+
 
 // 绘制背景
 ctx.fillStyle = "#dcc1ab";

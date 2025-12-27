@@ -32,6 +32,13 @@ function initLevel(){
 
 // 刷新屏幕显示
 function reflashScreen(){
+    // 绘制标题
+    ctx.fillStyle = "#000000";
+    ctx.font='64px sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText("银山推箱子", W/2, H/2 -320);
+
     InitMap();
     DrawMap(curMap);
     drawSidebar();
@@ -39,7 +46,6 @@ function reflashScreen(){
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
-    questionSprite.scale();
 }
 
 // 填充题目队列
@@ -96,7 +102,7 @@ function drawSidebar() {
     ctx.fillRect(0, 0, 300, H);
 
     let centerX = 150; // 侧边栏中心X
-    let startY = 20;   // 起始Y位置
+    let startY = 80;   // 起始Y位置
     
     // 2. 绘制标题
     ctx.font = "bold 20px Arial";
@@ -135,8 +141,8 @@ function drawSidebar() {
         ctx.fillText("知识点: " + currentQuestion.category, 10, hintY);
     }
     
-    // 4. 绘制输入区域 (y: 230-320)
-    let inputY = 230;
+    // 4. 绘制输入区域
+    let inputY = 600;
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(centerX - 120, inputY, 240, 45);
     ctx.lineWidth = 2;
@@ -226,6 +232,7 @@ function drawWrappedText(text, maxWidth, x, y, lineHeight, fontSize, color) {
 function doKeyDown(event){
     let key = event.key; // 获取按键字符
     let keyCode = event.keyCode;
+    playSound('typing'); // 播放打字音效
 
     // 1. 处理功能键
     if (keyCode === 8) { // Backspace
@@ -267,11 +274,13 @@ function doClick(event) {
     // 2. 检查点击是否在按钮范围内
     if (isButtonClicked(clickX, clickY, buttonNext)) {
         // 3. 触发事件
-        handleButtonNextClick();
+        handleButtonNextClick(clickX,clickY);
     }else if (isButtonClicked(clickX, clickY, buttonPre)) {
-        handleButtonPreClick();
+        handleButtonPreClick(clickX,clickY);
     }else if (isButtonClicked(clickX, clickY, buttonReset)) {
+        playSound('button_click');
         initLevel();
+        floatingTexts.push(new FloatingText(clickX, clickY, "已重置"));
     }
 }
 
@@ -302,8 +311,7 @@ function checkInputLogic() {
         userTyping = "";
         questionQueue.shift(); // 移除已完成题目
         fillQuestionQueue();   // 补充新题目
-        // 重置强调动画
-        questionSprite.reset();
+
     }
 }
 
@@ -358,6 +366,7 @@ function moveForward() {
     // 尝试移动
     if (Trygo(p1, p2))
     {
+        playSound('move'); // 播放移动音效
         moveTimes++;
         showMoveInfo();
         
@@ -462,6 +471,12 @@ function Trygo(p1,p2){
         }
         //若果判断不成功小人前面的箱子前进一步
         curMap[p2.x][p2.y] = 3;//更改地图对应坐标点的值
+        
+        // 检查箱子新位置(p2)是否是目标点(2或5)
+        if (curLevel[p2.x][p2.y] == 2 || curLevel[p2.x][p2.y] == 5)
+        {
+            playSound('coin_recived');//播放音效
+        }
         //console.log(curMap[p2.x][p2.y]);
     }
     //若果都没判断成功小人前进一步
@@ -526,16 +541,18 @@ function isButtonClicked(clickX, clickY,button) {
     );
 }
 
-function handleButtonNextClick(){
+function handleButtonNextClick(clickX, clickY){
+    playSound('button_click');
     if (iCurlevel >= levels.length - 1) {
-        alert("已经是最后一关了！");
+        floatingTexts.push(new FloatingText(clickX, clickY, "已经是最后一关了"));
         return;
     }
     NextLevel(1);
 }
-function handleButtonPreClick(){
+function handleButtonPreClick(clickX, clickY){
+    playSound('button_click');
     if (iCurlevel <= 0) {
-        alert("已经是第一关了！");
+        floatingTexts.push(new FloatingText(clickX, clickY, "已经是第一关了"));
         return;
     }
     NextLevel(-1);
@@ -543,14 +560,47 @@ function handleButtonPreClick(){
 
 // 游戏主循环
 function gameLoop() {
-    questionSprite.scale();
+    // 1. 清除背景 (防止文字重叠)
+    ctx.fillStyle = "#dcc1ab";
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. 绘制游戏基础画面 (地图、侧边栏、按钮等)
+    // 注意：reflashScreen 内部调用了 questionSprite.scale()
+    reflashScreen(); 
     
-    // 更新并绘制通关提示动画
+    // 3. 更新并绘制通关提示动画
     if (typeof hintSprite !== 'undefined') {
         hintSprite.update();
         hintSprite.draw();
     }
 
-    drawSidebar(); // 只重绘侧边栏，避免闪烁
+    // 4. 更新并绘制浮动文本
+    updateAndDrawFloatingTexts(); 
+    
     requestAnimationFrame(gameLoop);
+}
+
+function updateAndDrawFloatingTexts(){
+    for(let i = 0; i < floatingTexts.length; i++){
+        let ft = floatingTexts[i];
+
+        ft.y -= 1; // 向上移动
+        ft.alpha -= 0.02; // 逐渐变透明
+
+        ft.life -= 0.02; // 生命值减少
+
+        if(ft.life>0){
+            ctx.save(); // 保存当前画布状态
+            ctx.globalAlpha = ft.life; // 设置透明度
+            ctx.font = "bold 24px Arial";
+            ctx.fillStyle = ft.color;
+            ctx.textAlign = "center";
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore(); // 恢复画布状态
+        }else{
+             // 3. 如果生命值耗尽，从数组中移除
+            floatingTexts.splice(i, 1);
+            i--; // 修正索引
+        }
+    }
 }
