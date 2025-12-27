@@ -79,12 +79,7 @@ let hintSprite = {
         if (!this.image) return;
         
         // 2. 绘制标题
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        // 右侧栏中心 x = 980 + 150 = 1130
-        ctx.fillText("通关提示", 1130, this.y - 10);
+
 
         // 3. 绘制当前帧
         ctx.drawImage(
@@ -97,27 +92,8 @@ let hintSprite = {
     }
 };
 
-// 题目高亮动画精灵（用于当前题目的强调效果）
-let questionSprite = {
-    baseFontSize: 18,
-    currentFontSize: 18,
-    minSize: 16,
-    maxSize: 22,
-    animationSpeed: 0.03,
-    time: 0,
 
-    scale: function() {
-        this.time += this.animationSpeed;
-        let scale = 1 + Math.sin(this.time) * 0.1;
-        this.currentFontSize = this.baseFontSize * scale;
-        this.currentFontSize = Math.max(this.minSize, Math.min(this.maxSize, this.currentFontSize));
-    },
-    
-    reset: function() {
-        this.time = 0;
-        this.currentFontSize = this.baseFontSize;
-    }
-};  
+
 const buttonNext = {
     x: 1280-100,
     y: 800-50,

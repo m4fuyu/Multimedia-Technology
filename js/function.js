@@ -15,31 +15,34 @@ function initLevel(){
     
     // 填满题目队列 (保持5-10个题目)
     fillQuestionQueue();
-    reflashScreen(); // 绘制地图和侧边栏
+    // reflashScreen(); // 移除手动调用，由循环接管
     
     // 初始化通关提示动画
-    if (typeof hintSprite !== 'undefined') {
-        hintSprite.setLevel(iCurlevel);
-    }
-
-    // 注意：drawSidebar 会在 DrawMap 结束时调用，或者我们需要手动调用它
-    // 建议在 DrawMap 底部统一调用 drawSidebar
-    if (typeof window.gameLoopStarted === 'undefined') {
-        window.gameLoopStarted = true;
-        setTimeout(() => gameLoop(), 500);
-    }
+    hintSprite.setLevel(iCurlevel);
+    reflashScreen();
 }
 
-// 刷新屏幕显示
+// 刷新屏幕显示 (兼游戏主循环)
 function reflashScreen(){
+    //更新动画状态
+    // questionSprite.scale(); // 已移除
+
+    hintSprite.update();
+    
+
+    //绘制所有内容
     InitMap();
     DrawMap(curMap);
     drawSidebar();
     showMoveInfo();
+    // 绘制通关提示动画
+    hintSprite.draw();
     drawButton(buttonNext);
     drawButton(buttonPre);
     drawButton(buttonReset);
-    questionSprite.scale();
+
+    // 3. 循环调用
+    requestAnimationFrame(reflashScreen);
 }
 
 // 填充题目队列
@@ -91,84 +94,95 @@ function DrawMap(level){
 
 // 绘制左侧侧边栏 (题目显示 + 输入框)
 function drawSidebar() {
-    // 1. 清除侧边栏区域 (左侧 300px 宽)
-    ctx.fillStyle = "#5e89c9ff";
+    // 1. 绘制侧边栏背景 (美化：渐变色)
+    let gradient = ctx.createLinearGradient(0, 0, 300, H);
+    gradient.addColorStop(0, "#4a90e2");
+    gradient.addColorStop(1, "#005c97");
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 300, H);
 
+    // 装饰性边框
+    ctx.strokeStyle = "rgba(255,255,255,0.3)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, 280, H - 20);
+
     let centerX = 150; // 侧边栏中心X
-    let startY = 20;   // 起始Y位置
+    let startY = 40;   // 起始Y位置
     
     // 2. 绘制标题
-    ctx.font = "bold 20px Arial";
+    ctx.font = "bold 24px Arial";
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 4;
     ctx.fillText("英语语法题", centerX, startY);
+    ctx.shadowBlur = 0; // 重置阴影
     
-    // 3. 绘制当前题目区域 (y: 50-200，高度约150px)
-    let questionY = startY + 40;
+    // 3. 绘制当前题目区域
+    let questionY = startY + 50;
     let currentQuestion = questionQueue[0];
     if (currentQuestion) {
-        // 绘制题目（支持换行，最大高度约100px）
-        drawWrappedText(currentQuestion.question, 280, 10, questionY, 20, 16, "#FFFFFF");
+        // 题目背景卡片
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.fillRect(15, questionY - 10, 270, 200);
         
-        // 绘制提示（在题目下方，根据题目行数动态调整）
-        let hintY = questionY + 90; // 预留90px给题目
-        ctx.font = "13px Arial";
-        ctx.fillStyle = "#FFD700";
+        // 绘制题目
+        drawWrappedText(currentQuestion.question, 260, 20, questionY, 24, 18, "#FFFFFF");
+        
+        // 绘制提示
+        let hintY = questionY + 100; 
+        ctx.font = "italic 14px Arial";
+        ctx.fillStyle = "#FFD700"; // 金色提示
         ctx.textAlign = "left";
-        ctx.textBaseline = "top";
-        // 提示文本也支持换行
-        let hintText = currentQuestion.hint;
-        if (ctx.measureText(hintText).width > 280) {
-            // 提示太长则换行
-            drawWrappedText(hintText, 280, 10, hintY, 18, 13, "#FFD700");
-            hintY += 30;
-        } else {
-            ctx.fillText(hintText, 10, hintY);
-            hintY += 20;
-        }
         
-        // 绘制知识点分类
-        ctx.font = "12px Arial";
-        ctx.fillStyle = "#90EE90";
-        ctx.fillText("知识点: " + currentQuestion.category, 10, hintY);
+        let hintText = "提示: " + currentQuestion.hint;
+        drawWrappedText(hintText, 260, 20, hintY, 20, 14, "#FFD700");
+        
+        // 绘制知识点
+        ctx.fillStyle = "#90EE90"; // 浅绿
+        ctx.fillText("知识点: " + currentQuestion.category, 20, hintY + 60);
     }
     
-    // 4. 绘制输入区域 (y: 230-320)
-    let inputY = 230;
+    // 4. 绘制输入区域 (移动到下方)
+    let inputY = H - 200; // 距离底部200px
+    
+    // 简单输入框背景
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(centerX - 120, inputY, 240, 45);
+    ctx.beginPath();
+    ctx.rect(centerX - 120, inputY, 240, 50);
+    ctx.fill();
+    
+    // 简单边框
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#000000";
-    ctx.strokeRect(centerX - 120, inputY, 240, 45);
+    ctx.stroke();
     
-    // 绘制输入提示
-    ctx.font = "14px Arial";
+    // 绘制输入提示标签
+    ctx.font = "16px Arial";
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
-    ctx.fillText("输入答案单词:", centerX, inputY - 20);
+    ctx.fillText("输入答案单词:", centerX, inputY - 30);
     
     // 绘制用户输入的内容
-    ctx.font = "bold 20px Courier New";
+    ctx.font = "bold 22px Courier New";
     ctx.fillStyle = "#000000";
     ctx.textBaseline = "middle";
-    // 处理长文本（如果有空格，如"more interesting"）
     let displayText = userTyping.length > 15 ? userTyping.substring(0, 15) + "..." : userTyping;
-    ctx.fillText(displayText, centerX, inputY + 22);
+    ctx.fillText(displayText, centerX, inputY + 25);
     
-    // 5. 绘制操作提示 (y: 330-380)
+    // 5. 绘制操作提示 (最下方)
     ctx.font = "14px Arial";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText("输入单词答案移动", centerX, inputY + 70);
-    ctx.fillText("输入up/down/left/right转向", centerX, inputY + 95);
-    ctx.fillText("当前朝向: " + currentFacing.toUpperCase(), centerX, inputY + 120);
+    ctx.fillStyle = "rgba(255,255,255,0.8)";
+    ctx.fillText("输入单词答案移动 | 输入方向词转向", centerX, H - 80);
+    ctx.fillText("当前朝向: " + currentFacing.toUpperCase(), centerX, H - 50);
     
-    // 6. 绘制已完成题目历史（可选，y: 400-600）
+    // 6. 绘制已完成题目历史
     if (answeredQuestions.length > 0) {
         ctx.font = "bold 14px Arial";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("已完成: " + answeredQuestions.length + "题", centerX, 400);
+        ctx.textAlign = "right";
+        ctx.fillText("已完成: " + answeredQuestions.length + "题", 280, 30);
     }
 }
 
@@ -254,7 +268,7 @@ function doKeyDown(event){
     checkInputLogic();
     
     // 4. 重绘界面更新输入框显示
-    reflashScreen();
+    // reflashScreen(); // 移除手动调用，由循环接管
 }
 
 function doClick(event) {
@@ -302,8 +316,6 @@ function checkInputLogic() {
         userTyping = "";
         questionQueue.shift(); // 移除已完成题目
         fillQuestionQueue();   // 补充新题目
-        // 重置强调动画
-        questionSprite.reset();
     }
 }
 
@@ -493,8 +505,16 @@ function showMoveInfo(){
     ctx.fillRect(1280-300, 0, W, H);
     ctx.fillStyle = "#000000";
     ctx.font='36px sans-serif';
+    // 显式设置对齐方式，防止受其他函数（如drawSidebar）状态影响
+    ctx.textAlign = "center"; 
     ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
     ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px sans-serif";
+    // ctx.textAlign = "center"; // 上面已经设置了
+    ctx.textBaseline = "bottom";
+    ctx.fillText("通关提示", 1130, hintSprite.y - 10);
+
 }
 
 // 绘制按钮
@@ -541,16 +561,3 @@ function handleButtonPreClick(){
     NextLevel(-1);
 }
 
-// 游戏主循环
-function gameLoop() {
-    questionSprite.scale();
-    
-    // 更新并绘制通关提示动画
-    if (typeof hintSprite !== 'undefined') {
-        hintSprite.update();
-        hintSprite.draw();
-    }
-
-    drawSidebar(); // 只重绘侧边栏，避免闪烁
-    requestAnimationFrame(gameLoop);
-}
