@@ -162,7 +162,9 @@ let oImgs = {
     "down" : "image/down.png",
     "left" : "image/left.png",
     "right" : "image/right.png",
-    "level1_ans" : "image/level1_ans.png"
+    "level1_ans" : "image/level1_ans.png",
+    "level2_ans" : "image/level2_ans.png"
+
 }
 
 //预加载图片
