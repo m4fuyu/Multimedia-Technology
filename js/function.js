@@ -53,12 +53,30 @@ function fillQuestionQueue() {
 /*
 //--------------------------------------------canvas绘制相关---------------------------------
 */
+// 预加载图片
+function imgPreload(srcs,callback){
+    var count = 0,imgNum = 0,images = {};
 
+    for(src in srcs){
+        imgNum++;
+    }
+    for(src in srcs ){
+        images[src] = new Image();
+        images[src].onload = function(){
+            //判断是否所有的图片都预加载完成
+            if (++count >= imgNum)
+            {
+                callback(images);
+            }
+        }
+        images[src].src = srcs[src];
+    }
+}
  // 刷新屏幕显示 (兼游戏主循环)
 function reflashScreen(){
     // 1. 清除背景 (防止文字重叠)
-    ctx.fillStyle = "#dcc1ab";
-    ctx.fillRect(0, 0, W, H);
+    // ctx.fillStyle = "#dcc1ab";
+    // ctx.fillRect(0, 0, W, H);
 
     // 绘制标题
     ctx.fillStyle = "#000000";
@@ -67,12 +85,12 @@ function reflashScreen(){
     ctx.textBaseline = 'alphabetic';
     ctx.fillText("银山推箱子", W/2, H/2 -320);
 
+    drawSky();
     InitMap();
     DrawMap(curMap);
+    
     drawSidebar();
     showMoveInfo();
-    
-    // 更新并绘制通关提示动画
 
     hintSprite.update();
     hintSprite.draw();
@@ -297,8 +315,6 @@ function drawButton(button){
 
 //绘制左侧栏的提示
 function showMoveInfo(){
-    ctx.fillStyle = "#ababdcff";
-    ctx.fillRect(1280-300, 0, W, H);
     ctx.fillStyle = "#000000";
     ctx.font='36px sans-serif';
     ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
@@ -310,11 +326,8 @@ function showMoveInfo(){
     ctx.fillText("通关提示", 1130, 210);
 }
 
-/*
-//--------------------------------------------精灵动画绘制---------------------------------
-*/
 
-//绘制上浮文字的精灵动画
+//绘制上浮文字
 function updateAndDrawFloatingTexts(){
     for(let i = 0; i < floatingTexts.length; i++){
         let ft = floatingTexts[i];

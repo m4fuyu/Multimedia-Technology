@@ -102,9 +102,9 @@ function FloatingText(x, y, text) {
 --------------------------------------------精灵对象---------------------------------
 */
 
-// 全局存储加载的图片对象
-let loadedImages = {};
 // 提示动画精灵对象
+// 全局资源表：由 imgPreload 完成后赋值
+let assets = null;
 let hintSprite = {
     x: 990, // 右侧栏起始980，宽度300。居中：980 + (300-280)/2 = 990
     y: 220, // 避开上方的文字信息
@@ -118,17 +118,24 @@ let hintSprite = {
     image: null,
 
     setLevel: function(levelIndex) {
-        // 根据关卡索引获取对应的提示图片 key (例如 level1_ans)
-        let key = "level" + (levelIndex + 1) + "_ans";
-        if (loadedImages && loadedImages[key]) {
-            this.image = loadedImages[key];
+        // 不再使用 loadedImages；直接根据当前关卡索引(iCurlevel)取对应提示图
+        let index = (typeof levelIndex === 'number') ? levelIndex : iCurlevel;
+        let key = "level" + (index + 1) + "_ans";
+
+        if (assets && assets[key]) {
+            this.image = assets[key];
             this.totalFrames = Math.floor(this.image.width / this.frameWidth);
             this.currentFrame = 0;
+            this.tickCount = 0;
             // 计算显示高度 (保持宽高比)
             let ratio = this.width / this.frameWidth;
             this.height = this.image.height * ratio;
         } else {
             this.image = null;
+            this.totalFrames = 0;
+            this.currentFrame = 0;
+            this.tickCount = 0;
+            this.height = 0;
         }
     },
 
@@ -143,8 +150,7 @@ let hintSprite = {
 
     draw: function() {
         if (!this.image) return;
-        
-        // 3. 绘制当前帧
+        //绘制当前帧
         ctx.drawImage(
             this.image,
             this.currentFrame * this.frameWidth, 0, // 源图像坐标 (sx, sy)
@@ -169,14 +175,18 @@ let oImgs = {
     "down" : "image/down.png",
     "left" : "image/left.png",
     "right" : "image/right.png",
-    "level1_ans" : "image/level1_ans.png",
-    "level2_ans" : "image/level2_ans.png"
-
+    "level3_ans" : "image/level3_ans.png",
+    "level2_ans" : "image/level2_ans.png",
+    "sky1" : "image/kumo.jpg",
+    "sky2" : "image/kumo_fan.jpg"
 }
 
 //预加载图片
 let block,wall,box,ball,up,down,left,right,sky1,sky2;
-imgPreload(oImgs,function(images){
+// 加载图片
+imgPreload(oImgs, function(images){
+    assets = images;
+
     block = images.block;
     wall = images.wall;
     box = images.box;
@@ -187,6 +197,8 @@ imgPreload(oImgs,function(images){
     right = images.right;
     sky1 = images.sky1;
     sky2 = images.sky2;
+    initLevel();
+    // 图片加载完成后再初始化关卡，避免 setLevel/drawSky 读取到 0 尺寸
 // console.log("images/block.png:", images.block.complete ? "加载成功" : "加载失败");
 // console.log("images/wall.png:", images.wall.complete ? "加载成功" : "加载失败");
 // console.log("images/box.png:", images.box.complete ? "加载成功" : "加载失败");
@@ -195,13 +207,13 @@ imgPreload(oImgs,function(images){
 // console.log("images/down.png:", images.down.complete ? "加载成功" : "加载失败");
 // console.log("images/left.png:", images.left.complete ? "加载成功" : "加载失败");
 // console.log("images/right.png:", images.right.complete ? "加载成功" : "加载失败");
-
-    initLevel();
 });
 
 //捕获用户上下左右移动
 document.addEventListener('keydown', doKeyDown);
 canvas.addEventListener('click', doClick);
+
+
 
 
 
