@@ -1,3 +1,6 @@
+/*
+--------------------------------------------定义变量---------------------------------
+*/
 
 // 找到canvas元素
 let canvas = document.getElementById("gameCanvas");
@@ -9,6 +12,7 @@ let W = canvas.width;
 let H = canvas.height;
 let offsetX = 360; // 水平居中偏移量 (1280-560)/2 = 360
 let offsetY = 150; // 垂直偏移量（标题下方）
+
 let w = 35,h = 35; // 单位方块大小
 let curMap;//当前的地图
 let curLevel;//当前等级的地图
@@ -23,26 +27,44 @@ let answeredQuestions = []; // 已完成的题目历史
 let userTyping = "";  // 用户输入
 let currentFacing = "down"; // 朝向
 
-// 加载图片地址
-let oImgs = {
-    "block" : "image/block.gif",
-    "wall" : "image/wall.png",
-    "box" : "image/box.png",
-    "ball" : "image/ball.png",
-    "up" : "image/up.png",
-    "down" : "image/down.png",
-    "left" : "image/left.png",
-    "right" : "image/right.png",
-    "level1_ans" : "image/level1_ans.png",
-    "sky1": "image/kumo.jpg",
-    "sky2": "image/kumo_fan.jpg"
-}
+
 // 天空滚动相关变量
 let skyOffset = 0;
 let SKY_VELOCITY = 30; 
 let lastTime = 0;
 let fps = 60;
 
+const buttonNext = {
+    x: 1280-100,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '下一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonPre = {
+    x: 1280-300,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '上一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonReset = {
+    x: 1280-200,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '重置关卡',
+    color: '#007bff' // 蓝色
+};
+
+
+/*
+--------------------------------------------音效相关---------------------------------
+*/
 // 音效对象
 let sounds = {
     move: new Audio("sound/move.mp3"),
@@ -50,12 +72,10 @@ let sounds = {
     button_click: new Audio("sound/button_click.mp3"),
     typing: new Audio("sound/typing.mp3")
 };
-
 // 设置音量
 sounds.move.volume = 1;         // 移动音效调小
 sounds.coin_recived.volume = 0.2; // 进洞音效适中
 sounds.button_click.volume = 0.5; // 按钮音效适中
-
 // 播放音效的辅助函数
 function playSound(name) {
     if (sounds[name]) {
@@ -64,9 +84,26 @@ function playSound(name) {
     }
 }
 
+
+// 存储所有活跃的浮动文字
+let floatingTexts = [];
+// 浮动文字精灵对象构造函数
+function FloatingText(x, y, text) {
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.life = 2.0; // 生命值/透明度 (2.0 -> 0.0)
+    this.speed = 2;  // 向上飘的速度
+    this.color = "#00D1CE"; // 文字颜色
+}
+
+
+/*
+--------------------------------------------精灵对象---------------------------------
+*/
+
 // 全局存储加载的图片对象
 let loadedImages = {};
-
 // 提示动画精灵对象
 let hintSprite = {
     x: 990, // 右侧栏起始980，宽度300。居中：980 + (300-280)/2 = 990
@@ -107,8 +144,6 @@ let hintSprite = {
     draw: function() {
         if (!this.image) return;
         
-
-
         // 3. 绘制当前帧
         ctx.drawImage(
             this.image,
@@ -118,42 +153,26 @@ let hintSprite = {
             this.width, this.height                 // 目标尺寸 (dw, dh)
         );
     }
-};  
-const buttonNext = {
-    x: 1280-100,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '下一关',
-    color: '#007bff' // 蓝色
 };
 
-const buttonPre = {
-    x: 1280-300,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '上一关',
-    color: '#007bff' // 蓝色
-};
+/*
+--------------------------------------------图片相关---------------------------------
+*/
 
-const buttonReset = {
-    x: 1280-200,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '重置关卡',
-    color: '#007bff' // 蓝色
-};
+// 加载图片地址2
+let oImgs = {
+    "block" : "image/block.gif",
+    "wall" : "image/wall.png",
+    "box" : "image/box.png",
+    "ball" : "image/ball.png",
+    "up" : "image/up.png",
+    "down" : "image/down.png",
+    "left" : "image/left.png",
+    "right" : "image/right.png",
+    "level1_ans" : "image/level1_ans.png",
+    "level2_ans" : "image/level2_ans.png"
 
-// 绘制背景
-ctx.fillStyle = "#dcc1ab";
-ctx.fillRect(0, 0, W, H);
-ctx.fillStyle = "#000000";
-ctx.font='64px sans-serif';
-ctx.textAlign='center';
-ctx.fillText("银山推箱子", W/2, H/2 -320);
-
+}
 
 //预加载图片
 let block,wall,box,ball,up,down,left,right,sky1,sky2;
