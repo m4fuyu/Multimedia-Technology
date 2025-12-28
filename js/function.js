@@ -21,7 +21,7 @@ function initLevel(){
     userTyping = "";
     moveTimes = 0;
     
-    // 填满题目队列 (保持5-10个题目)
+    // 填满题目队列
     fillQuestionQueue();
     // reflashScreen(); // 绘制地图和侧边栏
     
@@ -77,7 +77,7 @@ function reflashScreen(){
     // 1. 清除背景 (防止文字重叠)
     // ctx.fillStyle = "#dcc1ab";
     // ctx.fillRect(0, 0, W, H);
-
+    drawSky();
     // 绘制标题
     ctx.fillStyle = "#000000";
     ctx.font='64px sans-serif';
@@ -85,7 +85,7 @@ function reflashScreen(){
     ctx.textBaseline = 'alphabetic';
     ctx.fillText("银山推箱子", W/2, H/2 -320);
 
-    drawSky();
+
     InitMap();
     DrawMap(curMap);
     

@@ -67,10 +67,10 @@ const buttonReset = {
 */
 // 音效对象
 let sounds = {
-    move: new Audio("sound/move.mp3"),
-    coin_recived: new Audio("sound/coin_recieved.mp3"),
-    button_click: new Audio("sound/button_click.mp3"),
-    typing: new Audio("sound/typing.mp3")
+    move: new Audio("sound/move.mp3"),// 移动音效
+    coin_recived: new Audio("sound/coin_recieved.mp3"),// 进洞音效
+    button_click: new Audio("sound/button_click.mp3"),// 按钮音效
+    typing: new Audio("sound/typing.mp3")// 输入音效
 };
 // 设置音量
 sounds.move.volume = 1;         // 移动音效调小
@@ -177,6 +177,7 @@ let oImgs = {
     "right" : "image/right.png",
     "level3_ans" : "image/level3_ans.png",
     "level2_ans" : "image/level2_ans.png",
+    "level1_ans" : "image/level1_ans.png",
     "sky1" : "image/kumo.jpg",
     "sky2" : "image/kumo_fan.jpg"
 }
