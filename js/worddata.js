@@ -147,6 +147,33 @@ const englishSingleChoiceQuestions = [
         explanation: "以辅音字母+y结尾，变y为i再加es变成dictionaries",
         category: "名词复数"
     },
+    {
+        id: 47,
+        question: "There are five ________ (family) in the village.",
+        hint: "用family的适当形式填空",
+        baseWord: "family",
+        correctAnswer: "families",
+        explanation: "以辅音字母+y结尾，变y为i加es",
+        category: "名词复数"
+    },
+    {
+        id: 48,
+        question: "Please give me two ________ (knife).",
+        hint: "用knife的适当形式填空",
+        baseWord: "knife",
+        correctAnswer: "knives",
+        explanation: "以fe结尾的名词，变fe为v加es",
+        category: "名词复数"
+    },
+    {
+        id: 49,
+        question: "Look at those ________ (sheep) on the hill.",
+        hint: "用sheep的适当形式填空",
+        baseWord: "sheep",
+        correctAnswer: "sheep",
+        explanation: "sheep是单复数同形",
+        category: "名词复数"
+    },
     
     // ========== 过去式变形 ==========
     {
@@ -203,6 +230,42 @@ const englishSingleChoiceQuestions = [
         explanation: "watch的过去式是watched（规则变化，加ed）",
         category: "过去式"
     },
+    {
+        id: 43,
+        question: "I ________ (go) to the park yesterday.",
+        hint: "用go的适当形式填空",
+        baseWord: "go",
+        correctAnswer: "went",
+        explanation: "yesterday表示过去时，go的过去式是went",
+        category: "一般过去时"
+    },
+    {
+        id: 44,
+        question: "We ________ (see) a movie last night.",
+        hint: "用see的适当形式填空",
+        baseWord: "see",
+        correctAnswer: "saw",
+        explanation: "last night表示过去时，see的过去式是saw",
+        category: "一般过去时"
+    },
+    {
+        id: 45,
+        question: "The bus ________ (stop) here ten minutes ago.",
+        hint: "用stop的适当形式填空",
+        baseWord: "stop",
+        correctAnswer: "stopped",
+        explanation: "ago表示过去时，stop双写p加ed",
+        category: "一般过去时"
+    },
+    {
+        id: 46,
+        question: "She ________ (study) for the test last weekend.",
+        hint: "用study的适当形式填空",
+        baseWord: "study",
+        correctAnswer: "studied",
+        explanation: "last weekend表示过去时，study变y为i加ed",
+        category: "一般过去时"
+    },
     
     // ========== 现在分词/动名词 ==========
     {
@@ -250,6 +313,42 @@ const englishSingleChoiceQuestions = [
         explanation: "sit的现在分词是sitting（双写t加ing）",
         category: "现在分词"
     },
+    {
+        id: 39,
+        question: "Look! The boys are ________ (run) on the playground.",
+        hint: "用run的适当形式填空",
+        baseWord: "run",
+        correctAnswer: "running",
+        explanation: "现在进行时be doing，run是重读闭音节，双写n加ing",
+        category: "现在进行时"
+    },
+    {
+        id: 40,
+        question: "Listen! She is ________ (sing) in the room.",
+        hint: "用sing的适当形式填空",
+        baseWord: "sing",
+        correctAnswer: "singing",
+        explanation: "现在进行时be doing，sing直接加ing",
+        category: "现在进行时"
+    },
+    {
+        id: 41,
+        question: "They are ________ (swim) in the pool now.",
+        hint: "用swim的适当形式填空",
+        baseWord: "swim",
+        correctAnswer: "swimming",
+        explanation: "swim是重读闭音节，双写m加ing",
+        category: "现在进行时"
+    },
+    {
+        id: 42,
+        question: "He is ________ (write) a letter at the moment.",
+        hint: "用write的适当形式填空",
+        baseWord: "write",
+        correctAnswer: "writing",
+        explanation: "以不发音e结尾的动词，去e加ing",
+        category: "现在进行时"
+    },
     
     // ========== 形容词比较级 ==========
     {
@@ -296,6 +395,35 @@ const englishSingleChoiceQuestions = [
         correctAnswer: "worse",
         explanation: "bad的比较级是worse（不规则变化）",
         category: "比较级"
+    },
+    {
+        id: 50,
+        question: "This box is ________ (heavy) than that one.",
+        hint: "用heavy的适当形式填空",
+        baseWord: "heavy",
+        correctAnswer: "heavier",
+        explanation: "than表示比较级，heavy变y为i加er",
+        category: "形容词比较级"
+    },
+    
+    // ========== 形容词最高级 ==========
+    {
+        id: 51,
+        question: "Who is the ________ (good) student in your class?",
+        hint: "用good的适当形式填空",
+        baseWord: "good",
+        correctAnswer: "best",
+        explanation: "in your class表示范围，用最高级，good的最高级是best",
+        category: "形容词最高级"
+    },
+    {
+        id: 52,
+        question: "Summer is the ________ (hot) season of the year.",
+        hint: "用hot的适当形式填空",
+        baseWord: "hot",
+        correctAnswer: "hottest",
+        explanation: "of the year表示范围，用最高级，hot双写t加est",
+        category: "形容词最高级"
     },
     
     // ========== be动词变形 ==========
@@ -356,6 +484,133 @@ const englishSingleChoiceQuestions = [
         correctAnswer: "children's",
         explanation: "children的复数所有格是children's",
         category: "名词所有格"
+    },
+
+    // ========== 介词填空 ==========
+    {
+        id: 53,
+        question: "We usually go to the park ________ Sunday.",
+        hint: "填入适当的介词",
+        baseWord: "on",
+        correctAnswer: "on",
+        explanation: "在具体的某一天（星期几）前用介词on",
+        category: "介词"
+    },
+    {
+        id: 54,
+        question: "My birthday is ________ May.",
+        hint: "填入适当的介词",
+        baseWord: "in",
+        correctAnswer: "in",
+        explanation: "在月份、年份、季节前用介词in",
+        category: "介词"
+    },
+    {
+        id: 55,
+        question: "I get up ________ 6:30 every morning.",
+        hint: "填入适当的介词",
+        baseWord: "at",
+        correctAnswer: "at",
+        explanation: "在具体的时间点前用介词at",
+        category: "介词"
+    },
+
+    // ========== 代词宾格 ==========
+    {
+        id: 56,
+        question: "Please give ________ (I) a cup of tea.",
+        hint: "用I的适当形式填空",
+        baseWord: "I",
+        correctAnswer: "me",
+        explanation: "动词give后接人称代词的宾格形式，I的宾格是me",
+        category: "代词宾格"
+    },
+    {
+        id: 57,
+        question: "Listen to ________ (he). He is right.",
+        hint: "用he的适当形式填空",
+        baseWord: "he",
+        correctAnswer: "him",
+        explanation: "介词to后接人称代词的宾格形式，he的宾格是him",
+        category: "代词宾格"
+    },
+    {
+        id: 58,
+        question: "I often play with ________ (they) on weekends.",
+        hint: "用they的适当形式填空",
+        baseWord: "they",
+        correctAnswer: "them",
+        explanation: "介词with后接人称代词的宾格形式，they的宾格是them",
+        category: "代词宾格"
+    },
+
+    // ========== 情态动词 ==========
+    {
+        id: 59,
+        question: "He can ________ (swim) very well.",
+        hint: "用swim的适当形式填空",
+        baseWord: "swim",
+        correctAnswer: "swim",
+        explanation: "情态动词can后接动词原形",
+        category: "情态动词"
+    },
+    {
+        id: 60,
+        question: "You must ________ (finish) your homework first.",
+        hint: "用finish的适当形式填空",
+        baseWord: "finish",
+        correctAnswer: "finish",
+        explanation: "情态动词must后接动词原形",
+        category: "情态动词"
+    },
+
+    // ========== 冠词 ==========
+    {
+        id: 61,
+        question: "There is ________ book on the desk.",
+        hint: "填入适当的冠词(a/an/the)",
+        baseWord: "a",
+        correctAnswer: "a",
+        explanation: "book以辅音音素开头，且表示泛指，用不定冠词a",
+        category: "冠词"
+    },
+    {
+        id: 62,
+        question: "She eats ________ apple every day.",
+        hint: "填入适当的冠词(a/an/the)",
+        baseWord: "an",
+        correctAnswer: "an",
+        explanation: "apple以元音音素开头，且表示泛指，用不定冠词an",
+        category: "冠词"
+    },
+    {
+        id: 63,
+        question: "Look at ________ sun in the sky.",
+        hint: "填入适当的冠词(a/an/the)",
+        baseWord: "the",
+        correctAnswer: "the",
+        explanation: "世界上独一无二的事物前用定冠词the",
+        category: "冠词"
+    },
+
+    // ========== There be 句型 ==========
+    {
+        id: 64,
+        question: "There ________ (be) a pen and two books on the desk.",
+        hint: "用be动词的适当形式填空",
+        baseWord: "be",
+        correctAnswer: "is",
+        explanation: "There be句型遵循就近原则，a pen是单数，所以用is",
+        category: "There be句型"
+    },
+    {
+        id: 65,
+        question: "There ________ (be) some flowers in the garden.",
+        hint: "用be动词的适当形式填空",
+        baseWord: "be",
+        correctAnswer: "are",
+        explanation: "flowers是复数，所以用are",
+        category: "There be句型"
     }
 ];
 

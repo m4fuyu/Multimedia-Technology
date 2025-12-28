@@ -9,6 +9,7 @@ let W = canvas.width;
 let H = canvas.height;
 let offsetX = 360; // 水平居中偏移量 (1280-560)/2 = 360
 let offsetY = 150; // 垂直偏移量（标题下方）
+
 let w = 35,h = 35; // 单位方块大小
 let curMap;//当前的地图
 let curLevel;//当前等级的地图
