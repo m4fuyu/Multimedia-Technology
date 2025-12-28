@@ -33,26 +33,90 @@ let oImgs = {
     "down" : "image/down.png",
     "left" : "image/left.png",
     "right" : "image/right.png",
+    "level1_ans" : "image/level1_ans.png",
+    "sky1": "image/kumo.jpg",
+    "sky2": "image/kumo_fan.jpg"
 }
-// 题目高亮动画精灵（用于当前题目的强调效果）
-let questionSprite = {
-    baseFontSize: 18,
-    currentFontSize: 18,
-    minSize: 16,
-    maxSize: 22,
-    animationSpeed: 0.03,
-    time: 0,
+// 天空滚动相关变量
+let skyOffset = 0;
+let SKY_VELOCITY = 30; 
+let lastTime = 0;
+let fps = 60;
 
-    scale: function() {
-        this.time += this.animationSpeed;
-        let scale = 1 + Math.sin(this.time) * 0.1;
-        this.currentFontSize = this.baseFontSize * scale;
-        this.currentFontSize = Math.max(this.minSize, Math.min(this.maxSize, this.currentFontSize));
+// 音效对象
+let sounds = {
+    move: new Audio("sound/move.mp3"),
+    coin_recived: new Audio("sound/coin_recieved.mp3"),
+    button_click: new Audio("sound/button_click.mp3"),
+    typing: new Audio("sound/typing.mp3")
+};
+
+// 设置音量
+sounds.move.volume = 1;         // 移动音效调小
+sounds.coin_recived.volume = 0.2; // 进洞音效适中
+sounds.button_click.volume = 0.5; // 按钮音效适中
+
+// 播放音效的辅助函数
+function playSound(name) {
+    if (sounds[name]) {
+        sounds[name].currentTime = 0; // 重置播放进度，支持快速连续播放
+        sounds[name].play().catch(e => console.log("Audio play failed:", e));
+    }
+}
+
+// 全局存储加载的图片对象
+let loadedImages = {};
+
+// 提示动画精灵对象
+let hintSprite = {
+    x: 990, // 右侧栏起始980，宽度300。居中：980 + (300-280)/2 = 990
+    y: 220, // 避开上方的文字信息
+    width: 280,
+    height: 0, 
+    frameWidth: 945,
+    currentFrame: 0,
+    totalFrames: 0,
+    tickCount: 0,
+    ticksPerFrame: 64, 
+    image: null,
+
+    setLevel: function(levelIndex) {
+        // 根据关卡索引获取对应的提示图片 key (例如 level1_ans)
+        let key = "level" + (levelIndex + 1) + "_ans";
+        if (loadedImages && loadedImages[key]) {
+            this.image = loadedImages[key];
+            this.totalFrames = Math.floor(this.image.width / this.frameWidth);
+            this.currentFrame = 0;
+            // 计算显示高度 (保持宽高比)
+            let ratio = this.width / this.frameWidth;
+            this.height = this.image.height * ratio;
+        } else {
+            this.image = null;
+        }
     },
-    
-    reset: function() {
-        this.time = 0;
-        this.currentFontSize = this.baseFontSize;
+
+    update: function() {
+        if (!this.image || this.totalFrames <= 1) return;
+        this.tickCount++;
+        if (this.tickCount > this.ticksPerFrame) {
+            this.tickCount = 0;
+            this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
+        }
+    },
+
+    draw: function() {
+        if (!this.image) return;
+        
+
+
+        // 3. 绘制当前帧
+        ctx.drawImage(
+            this.image,
+            this.currentFrame * this.frameWidth, 0, // 源图像坐标 (sx, sy)
+            this.frameWidth, this.image.height,     // 源图像尺寸 (sw, sh)
+            this.x, this.y,                         // 目标坐标 (dx, dy)
+            this.width, this.height                 // 目标尺寸 (dw, dh)
+        );
     }
 };  
 const buttonNext = {
@@ -92,7 +156,7 @@ ctx.fillText("银山推箱子", W/2, H/2 -320);
 
 
 //预加载图片
-let block,wall,box,ball,up,down,left,right;
+let block,wall,box,ball,up,down,left,right,sky1,sky2;
 imgPreload(oImgs,function(images){
     block = images.block;
     wall = images.wall;
@@ -102,6 +166,8 @@ imgPreload(oImgs,function(images){
     down = images.down;
     left = images.left;
     right = images.right;
+    sky1 = images.sky1;
+    sky2 = images.sky2;
 // console.log("images/block.png:", images.block.complete ? "加载成功" : "加载失败");
 // console.log("images/wall.png:", images.wall.complete ? "加载成功" : "加载失败");
 // console.log("images/box.png:", images.box.complete ? "加载成功" : "加载失败");
@@ -117,6 +183,8 @@ imgPreload(oImgs,function(images){
 //捕获用户上下左右移动
 document.addEventListener('keydown', doKeyDown);
 canvas.addEventListener('click', doClick);
+
+
 
 
 

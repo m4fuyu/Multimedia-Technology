@@ -27,6 +27,20 @@ function initLevel(){
 
 // 刷新屏幕显示
 function reflashScreen(){
+    // 1. 清除背景 (防止文字重叠)
+    ctx.fillStyle = "#dcc1ab";
+    ctx.fillRect(0, 0, W, H);
+
+    // 绘制滚动背景
+    drawSky();
+
+    // 绘制标题
+    ctx.fillStyle = "#000000";
+    ctx.font='64px sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText("银山推箱子", W/2, H/2 -320);
+
     InitMap();
     DrawMap(curMap);
     drawSidebar();
@@ -80,15 +94,41 @@ function DrawMap(level){
             ctx.drawImage(pic, offsetX + w*j-(pic.width-w)/2, offsetY + h*i-(pic.height-h), pic.width, pic.height);
 		}
 	}
-// 【新增】每次重绘地图时，更新左侧的打字UI    
     
 }
 
+// 绘制滚动背景
+function drawSky() {
+    if (typeof sky1 !== 'undefined' && sky1.complete && typeof sky2 !== 'undefined' && sky2.complete) {
+        ctx.save();
+        
+        // 计算图片宽高比
+        let ratio = sky1.width / sky1.height;
+        let scaledHeight = H;
+        let scaledWidth = scaledHeight * ratio;
+
+        // 偏移量周期为两张图片的宽度之和 (2 * scaledWidth)
+        // 这样可以保证 sky1 -> sky2 -> sky1 的循环
+        skyOffset = skyOffset < (2 * scaledWidth) ?
+                    skyOffset + SKY_VELOCITY / fps : 0;
+
+        ctx.translate(-skyOffset, 0);
+        
+        // 绘制三张图片以实现无缝滚动 (sky1 -> sky2 -> sky1)
+        // 当 sky1 移出屏幕，sky2 补上；当 sky2 移出，sky1 (第三张) 补上
+        // 此时 offset 归零，画面瞬间回到第一张 sky1，实现无缝循环
+        ctx.drawImage(sky1, 0, 0, scaledWidth, scaledHeight);
+        ctx.drawImage(sky2, scaledWidth, 0, scaledWidth, scaledHeight);
+        ctx.drawImage(sky1, 2 * scaledWidth, 0, scaledWidth, scaledHeight);
+        
+        ctx.restore();
+    }
+}
 // 绘制左侧侧边栏 (题目显示 + 输入框)
 function drawSidebar() {
     // 1. 清除侧边栏区域 (左侧 300px 宽)
-    ctx.fillStyle = "#5e89c9ff";
-    ctx.fillRect(0, 0, 300, H);
+    // ctx.fillStyle = "#5e89c9ff";
+    // ctx.fillRect(0, 0, 300, H);
 
     let centerX = 150; // 侧边栏中心X
     let startY = 20;   // 起始Y位置
@@ -109,8 +149,8 @@ function drawSidebar() {
         
         // 绘制提示（在题目下方，根据题目行数动态调整）
         let hintY = questionY + 90; // 预留90px给题目
-        ctx.font = "13px Arial";
-        ctx.fillStyle = "#FFD700";
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#77ff00ff";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
         // 提示文本也支持换行
@@ -123,11 +163,6 @@ function drawSidebar() {
             ctx.fillText(hintText, 10, hintY);
             hintY += 20;
         }
-        
-        // 绘制知识点分类
-        ctx.font = "12px Arial";
-        ctx.fillStyle = "#90EE90";
-        ctx.fillText("知识点: " + currentQuestion.category, 10, hintY);
     }
     
     // 4. 绘制输入区域 (y: 230-320)
@@ -484,8 +519,8 @@ function Trygo(p1,p2){
 
 //draw hit info
 function showMoveInfo(){
-    ctx.fillStyle = "#ababdcff";
-    ctx.fillRect(1280-300, 0, W, H);
+    // ctx.fillStyle = "#ababdcff";
+    // ctx.fillRect(1280-300, 0, W, H);// 右侧信息区域
     ctx.fillStyle = "#000000";
     ctx.font='36px sans-serif';
     ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
