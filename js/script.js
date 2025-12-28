@@ -1,3 +1,6 @@
+/*
+--------------------------------------------定义变量---------------------------------
+*/
 
 // 找到canvas元素
 let canvas = document.getElementById("gameCanvas");
@@ -24,10 +27,60 @@ let answeredQuestions = []; // 已完成的题目历史
 let userTyping = "";  // 用户输入
 let currentFacing = "down"; // 朝向
 
+const buttonNext = {
+    x: 1280-100,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '下一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonPre = {
+    x: 1280-300,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '上一关',
+    color: '#007bff' // 蓝色
+};
+
+const buttonReset = {
+    x: 1280-200,
+    y: 800-50,
+    width: 100,
+    height: 50,
+    text: '重置关卡',
+    color: '#007bff' // 蓝色
+};
+
+
+/*
+--------------------------------------------音效相关---------------------------------
+*/
+// 音效对象
+let sounds = {
+    move: new Audio("sound/move.mp3"),
+    coin_recived: new Audio("sound/coin_recieved.mp3"),
+    button_click: new Audio("sound/button_click.mp3"),
+    typing: new Audio("sound/typing.mp3")
+};
+// 设置音量
+sounds.move.volume = 1;         // 移动音效调小
+sounds.coin_recived.volume = 0.2; // 进洞音效适中
+sounds.button_click.volume = 0.5; // 按钮音效适中
+// 播放音效的辅助函数
+function playSound(name) {
+    if (sounds[name]) {
+        sounds[name].currentTime = 0; // 重置播放进度，支持快速连续播放
+        sounds[name].play().catch(e => console.log("Audio play failed:", e));
+    }
+}
+
+
 // 存储所有活跃的浮动文字
 let floatingTexts = [];
-
-// 浮动文字对象构造函数
+// 浮动文字精灵对象构造函数
 function FloatingText(x, y, text) {
     this.x = x;
     this.y = y;
@@ -37,43 +90,13 @@ function FloatingText(x, y, text) {
     this.color = "#00D1CE"; // 文字颜色
 }
 
-// 加载图片地址2
-let oImgs = {
-    "block" : "image/block.gif",
-    "wall" : "image/wall.png",
-    "box" : "image/box.png",
-    "ball" : "image/ball.png",
-    "up" : "image/up.png",
-    "down" : "image/down.png",
-    "left" : "image/left.png",
-    "right" : "image/right.png",
-    "level1_ans" : "image/level1_ans.png"
-}
 
-// 音效对象
-let sounds = {
-    move: new Audio("sound/move.mp3"),
-    coin_recived: new Audio("sound/coin_recieved.mp3"),
-    button_click: new Audio("sound/button_click.mp3"),
-    typing: new Audio("sound/typing.mp3")
-};
-
-// 设置音量
-sounds.move.volume = 1;         // 移动音效调小
-sounds.coin_recived.volume = 0.2; // 进洞音效适中
-sounds.button_click.volume = 0.5; // 按钮音效适中
-
-// 播放音效的辅助函数
-function playSound(name) {
-    if (sounds[name]) {
-        sounds[name].currentTime = 0; // 重置播放进度，支持快速连续播放
-        sounds[name].play().catch(e => console.log("Audio play failed:", e));
-    }
-}
+/*
+--------------------------------------------精灵对象---------------------------------
+*/
 
 // 全局存储加载的图片对象
 let loadedImages = {};
-
 // 提示动画精灵对象
 let hintSprite = {
     x: 990, // 右侧栏起始980，宽度300。居中：980 + (300-280)/2 = 990
@@ -114,8 +137,6 @@ let hintSprite = {
     draw: function() {
         if (!this.image) return;
         
-
-
         // 3. 绘制当前帧
         ctx.drawImage(
             this.image,
@@ -127,72 +148,40 @@ let hintSprite = {
     }
 };
 
+/*
+--------------------------------------------图片相关---------------------------------
+*/
 
-const buttonNext = {
-    x: 1280-100,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '下一关',
-    color: '#007bff' // 蓝色
-};
-
-const buttonPre = {
-    x: 1280-300,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '上一关',
-    color: '#007bff' // 蓝色
-};
-
-const buttonReset = {
-    x: 1280-200,
-    y: 800-50,
-    width: 100,
-    height: 50,
-    text: '重置关卡',
-    color: '#007bff' // 蓝色
-};
-
-
-
-// 绘制背景
-ctx.fillStyle = "#dcc1ab";
-ctx.fillRect(0, 0, W, H);
-ctx.fillStyle = "#000000";
-ctx.font='64px sans-serif';
-ctx.textAlign='center';
-ctx.fillText("银山推箱子", W/2, H/2 -320);
-
+// 加载图片地址2
+let oImgs = {
+    "block" : "image/block.gif",
+    "wall" : "image/wall.png",
+    "box" : "image/box.png",
+    "ball" : "image/ball.png",
+    "up" : "image/up.png",
+    "down" : "image/down.png",
+    "left" : "image/left.png",
+    "right" : "image/right.png",
+    "level1_ans" : "image/level1_ans.png"
+}
 
 //预加载图片
 let block,wall,box,ball,up,down,left,right;
-imgPreload(oImgs,function(images){
-    loadedImages = images; // 保存加载的图片引用
-    block = images.block;
-    wall = images.wall;
-    box = images.box;
-    ball = images.ball;
-    up = images.up;
-    down = images.down;
-    left = images.left;
-    right = images.right;
-// console.log("images/block.png:", images.block.complete ? "加载成功" : "加载失败");
-// console.log("images/wall.png:", images.wall.complete ? "加载成功" : "加载失败");
-// console.log("images/box.png:", images.box.complete ? "加载成功" : "加载失败");
-// console.log("images/ball.png:", images.ball.complete ? "加载成功" : "加载失败");
-// console.log("images/up.png:", images.up.complete ? "加载成功" : "加载失败");
-// console.log("images/down.png:", images.down.complete ? "加载成功" : "加载失败");
-// console.log("images/left.png:", images.left.complete ? "加载成功" : "加载失败");
-// console.log("images/right.png:", images.right.complete ? "加载成功" : "加载失败");
 
-    initLevel();
-});
+// 朴素加载图片
+for (let key in oImgs) {
+    loadedImages[key] = new Image();
+    loadedImages[key].src = oImgs[key];
+}
 
-//捕获用户上下左右移动
-document.addEventListener('keydown', doKeyDown);
-canvas.addEventListener('click', doClick);
-
+block = loadedImages.block;
+wall = loadedImages.wall;
+box = loadedImages.box;
+ball = loadedImages.ball;
+up = loadedImages.up;
+down = loadedImages.down;
+left = loadedImages.left;
+right = loadedImages.right; 
+initLevel();
 
 

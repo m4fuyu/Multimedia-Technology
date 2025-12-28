@@ -1,5 +1,13 @@
+/*
+//--------------------------------------------关卡初始化---------------------------------
+*/
+
 // 初始化游戏关卡
 function initLevel(){
+    //捕获用户上下左右移动
+    document.addEventListener('keydown', doKeyDown);
+    canvas.addEventListener('click', doClick);
+
     curMap = copyArray(levels[iCurlevel]);
     curLevel = levels[iCurlevel];
     
@@ -29,8 +37,24 @@ function initLevel(){
         reflashScreen();
     }
 }
+// 填充题目队列
+function fillQuestionQueue() {
+    while(questionQueue.length < 8) { 
+        // 从题目库中随机获取题目
+        let randomIndex = Math.floor(Math.random() * englishSingleChoiceQuestions.length);
+        let question = englishSingleChoiceQuestions[randomIndex];
+        // 避免重复题目
+        if (!questionQueue.find(q => q.id === question.id)) {
+            questionQueue.push(question);
+        }
+    }
+}
 
-// 刷新屏幕显示 (兼游戏主循环)
+/*
+//--------------------------------------------canvas绘制相关---------------------------------
+*/
+
+ // 刷新屏幕显示 (兼游戏主循环)
 function reflashScreen(){
     // 1. 清除背景 (防止文字重叠)
     ctx.fillStyle = "#dcc1ab";
@@ -59,26 +83,11 @@ function reflashScreen(){
     drawButton(buttonReset);
 
     // 更新并绘制浮动文本
-
     updateAndDrawFloatingTexts();
-    
-
     requestAnimationFrame(reflashScreen);
 }
 
-// 填充题目队列
-function fillQuestionQueue() {
-    while(questionQueue.length < 8) { 
-        // 从题目库中随机获取题目
-        let randomIndex = Math.floor(Math.random() * englishSingleChoiceQuestions.length);
-        let question = englishSingleChoiceQuestions[randomIndex];
-        // 避免重复题目
-        if (!questionQueue.find(q => q.id === question.id)) {
-            questionQueue.push(question);
-        }
-    }
-}
-// 绘制地板
+// 绘制地板（草坪）
 function InitMap(){
     for (var i=0;i<16 ;i++ ){
         for (var j=0;j<16 ;j++ ){
@@ -109,8 +118,6 @@ function DrawMap(level){
             ctx.drawImage(pic, offsetX + w*j-(pic.width-w)/2, offsetY + h*i-(pic.height-h), pic.width, pic.height);
 		}
 	}
-// 【新增】每次重绘地图时，更新左侧的打字UI    
-    
 }
 
 // 绘制左侧侧边栏 (题目显示 + 输入框)
@@ -246,102 +253,75 @@ function drawWrappedText(text, maxWidth, x, y, lineHeight, fontSize, color) {
     }
 }
 
-// 【核心修改】键盘监听逻辑
-function doKeyDown(event){
-    let key = event.key; // 获取按键字符
-    let keyCode = event.keyCode;
-    playSound('typing'); // 播放打字音效
+// 绘制按钮
+function drawButton(button){
+    // 绘制矩形
+    ctx.fillStyle = button.color;
+    ctx.fillRect(button.x, button.y, button.width, button.height);
 
-    // 1. 处理功能键
-    if (keyCode === 8) { // Backspace
-        userTyping = userTyping.slice(0, -1);
-        event.preventDefault(); // 防止浏览器后退
-    } 
-    else if (keyCode === 13) { // Enter
-        userTyping = "";
-    }
-    else if (key.length === 1 && (/[a-zA-Z\s]/.test(key))) {
-        // 2. 处理字母和空格输入（允许输入空格，如"more interesting"）
-        if (userTyping.length < 30) { // 增加长度限制以支持更长的答案
-            // 转换为小写，但保留空格
-            if (key === ' ') {
-                userTyping += ' ';
-            } else {
-                userTyping += key.toLowerCase();
-            }
+    // 绘制按钮文本
+    ctx.fillStyle = '#ffffff'; // 白色文本
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // 计算文本中心位置
+    const textX = button.x + button.width / 2;
+    const textY = button.y + button.height / 2;
+    
+    ctx.fillText(button.text, textX, textY);
+}
+
+//绘制左侧栏的提示
+function showMoveInfo(){
+    ctx.fillStyle = "#ababdcff";
+    ctx.fillRect(1280-300, 0, W, H);
+    ctx.fillStyle = "#000000";
+    ctx.font='36px sans-serif';
+    ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
+    ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("通关提示", 1130, 210);
+}
+
+/*
+//--------------------------------------------精灵动画绘制---------------------------------
+*/
+
+//绘制上浮文字的精灵动画
+function updateAndDrawFloatingTexts(){
+    for(let i = 0; i < floatingTexts.length; i++){
+        let ft = floatingTexts[i];
+
+        ft.y -= 1; // 向上移动
+        ft.alpha -= 0.02; // 逐渐变透明
+
+        ft.life -= 0.02; // 生命值减少
+
+        if(ft.life>0){
+            ctx.save(); // 保存当前画布状态
+            ctx.globalAlpha = ft.life; // 设置透明度
+            ctx.font = "bold 24px Arial";
+            ctx.fillStyle = ft.color;
+            ctx.textAlign = "center";
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore(); // 恢复画布状态
+        }else{
+             // 3. 如果生命值耗尽，从数组中移除
+            floatingTexts.splice(i, 1);
+            i--; // 修正索引
         }
-    } else {
-        // 忽略其他按键 (如 Ctrl, Shift 等)
-        return;
-    }
-
-    // 3. 实时检查逻辑
-    checkInputLogic();
-    
-    // 4. 重绘界面更新输入框显示
-    // reflashScreen(); // 由主循环处理
-}
-
-function doClick(event) {
-    // 1. 获取点击在 Canvas 上的相对坐标
-    // getBoundingClientRect() 返回 Canvas 相对于视口的位置
-    const rect = canvas.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
-
-    // 2. 检查点击是否在按钮范围内
-    if (isButtonClicked(clickX, clickY, buttonNext)) {
-        // 3. 触发事件
-        handleButtonNextClick(clickX,clickY);
-    }else if (isButtonClicked(clickX, clickY, buttonPre)) {
-        handleButtonPreClick(clickX,clickY);
-    }else if (isButtonClicked(clickX, clickY, buttonReset)) {
-        playSound('button_click');
-        initLevel();
-        floatingTexts.push(new FloatingText(clickX, clickY, "已重置"));
     }
 }
 
-//检查输入内容执行指令
-function checkInputLogic() {
-    // A. 检查转向指令 (up, down, left, right)
-    const directions = ["up", "down", "left", "right"];
-    if (directions.includes(userTyping)) {
-        turnTo(userTyping); // 仅转向
-        userTyping = ""; // 清空输入
-        return;
-    }
+/*
+--------------------------------------------推箱子游戏核心逻辑---------------------------------
+*/
 
-    // B. 检查是否匹配当前题目的正确答案
-    let currentQuestion = questionQueue[0];
-    if (!currentQuestion) return;
-    
-    // 标准化答案比较（去除空格、转小写、去除标点）
-    let normalizedInput = normalizeInput(userTyping);
-    let normalizedAnswer = normalizeInput(currentQuestion.correctAnswer);
-    
-    if (normalizedInput === normalizedAnswer) {
-        // 答案正确 -> 向当前方向移动一格
-        moveForward();
-        
-        // 逻辑更新
-        answeredQuestions.push(currentQuestion); // 记录已完成题目
-        userTyping = "";
-        questionQueue.shift(); // 移除已完成题目
-        fillQuestionQueue();   // 补充新题目
-
-    }
-}
-
-// 标准化输入（去除首尾空格、转小写、去除标点符号，但保留空格）
-function normalizeInput(input) {
-    if (!input) return "";
-    // 去除首尾空格，转小写，去除标点符号但保留空格
-    // 然后统一空格为单个空格
-    return input.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
-}
-
-//仅转向 (不移动坐标)
+//角色转向
 function turnTo(dir) {
     currentFacing = dir;
     switch(dir) {
@@ -353,7 +333,7 @@ function turnTo(dir) {
     // 转向后立即刷新画面显示新朝向
 }
 
-// 【新增】向前移动 (基于当前朝向)
+//向前移动 (基于当前朝向)
 function moveForward() {
     let p1, p2;
     // 根据当前朝向计算目标坐标
@@ -400,80 +380,6 @@ function moveForward() {
     }
 }
 
-function imgPreload(srcs,callback){
-    var count = 0,imgNum = 0,images = {};
-
-    for(src in srcs){
-        imgNum++;
-    }
-    for(src in srcs ){
-        images[src] = new Image();
-        images[src].onload = function(){
-            //判断是否所有的图片都预加载完成
-            if (++count >= imgNum)
-            {
-                callback(images);
-            }
-        }
-        images[src].src = srcs[src];
-    }
-}
-
-
-
-//复制移动后的地图
-function copyArray(arr){
-    var b=[];//每次移动更新地图数据都先清空再添加新的地图
-    for (var i=0;i<arr.length ;i++ )
-    {
-        b[i] = arr[i].concat();//链接两个数组
-    }
-    return b;
-}
-
-function Point(x,y){
-    this.x = x;
-    this.y = y;
-}
-
-
-
-//下一关
-function NextLevel(i){
-    //iCurlevel当前的地图关数
-    iCurlevel = iCurlevel + i;
-    if (iCurlevel<0)
-    {
-        iCurlevel = 0;
-        return;
-    }
-    var len = levels.length;
-    if (iCurlevel > len-1)
-    {
-        iCurlevel = len-1;
-    }
-    moveTimes = 0;//游戏关卡移动步数清零
-    initLevel();//初始当前等级关卡
-}
-
-
-//判断是否推成功
-function checkFinish(){
-    for (var i=0;i<curMap.length ;i++ )
-    {
-        for (var j=0;j<curMap[i].length ;j++ )
-        {
-            //当前移动过的地图和初始地图进行比较，若果初始地图上的陷进参数在移动之后不是箱子的话就指代没推成功
-            if (curLevel[i][j] == 2 && curMap[i][j] != 3 || curLevel[i][j] == 5 && curMap[i][j] != 3)
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-
 //判断小人是否能够移动
 function Trygo(p1,p2){
     if(p1.x<0) return false;//若果超出地图的上边，不通过
@@ -517,41 +423,152 @@ function Trygo(p1,p2){
     //若果小动了 返回true 指代能够移动小人
     return true;
 }
-//判断是否推成功
 
-
-//draw hit info
-function showMoveInfo(){
-    ctx.fillStyle = "#ababdcff";
-    ctx.fillRect(1280-300, 0, W, H);
-    ctx.fillStyle = "#000000";
-    ctx.font='36px sans-serif';
-    ctx.fillText("第" + (iCurlevel+1) +"关", 1280-150, 100);
-    ctx.fillText("移动次数: "+ moveTimes, 1280-150, 160);
-    ctx.fillStyle = "#000000";
-    ctx.font = "20px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-    ctx.fillText("通关提示", 1130, 210);
+//复制移动后的地图
+function copyArray(arr){
+    var b=[];//每次移动更新地图数据都先清空再添加新的地图
+    for (var i=0;i<arr.length ;i++ )
+    {
+        b[i] = arr[i].concat();//链接两个数组
+    }
+    return b;
 }
 
-// 绘制按钮
-function drawButton(button){
-    // 绘制矩形
-    ctx.fillStyle = button.color;
-    ctx.fillRect(button.x, button.y, button.width, button.height);
+function Point(x,y){
+    this.x = x;
+    this.y = y;
+}
 
-    // 绘制按钮文本
-    ctx.fillStyle = '#ffffff'; // 白色文本
-    ctx.font = '20px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+//下一关
+function NextLevel(i){
+    //iCurlevel当前的地图关数
+    iCurlevel = iCurlevel + i;
+    if (iCurlevel<0)
+    {
+        iCurlevel = 0;
+        return;
+    }
+    var len = levels.length;
+    if (iCurlevel > len-1)
+    {
+        iCurlevel = len-1;
+    }
+    moveTimes = 0;//游戏关卡移动步数清零
+    initLevel();//初始当前等级关卡
+}
+
+//判断是否推成功
+function checkFinish(){
+    for (var i=0;i<curMap.length ;i++ )
+    {
+        for (var j=0;j<curMap[i].length ;j++ )
+        {
+            //当前移动过的地图和初始地图进行比较，若果初始地图上的陷进参数在移动之后不是箱子的话就指代没推成功
+            if (curLevel[i][j] == 2 && curMap[i][j] != 3 || curLevel[i][j] == 5 && curMap[i][j] != 3)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+/*
+--------------------------------------------事件监听---------------------------------
+*/
+
+//键盘监听逻辑
+function doKeyDown(event){
+    let key = event.key; // 获取按键字符
+    let keyCode = event.keyCode;
+    playSound('typing'); // 播放打字音效
+
+    // 1. 处理功能键
+    if (keyCode === 8) { // Backspace
+        userTyping = userTyping.slice(0, -1);
+        event.preventDefault(); // 防止浏览器后退
+    } 
+    else if (keyCode === 13) { // Enter
+        userTyping = "";
+    }
+    else if (key.length === 1 && (/[a-zA-Z\s]/.test(key))) {
+        // 2. 处理字母和空格输入（允许输入空格，如"more interesting"）
+        if (userTyping.length < 30) { // 增加长度限制以支持更长的答案
+            // 转换为小写，但保留空格
+            if (key === ' ') {
+                userTyping += ' ';
+            } else {
+                userTyping += key.toLowerCase();
+            }
+        }
+    } else {
+        // 忽略其他按键 (如 Ctrl, Shift 等)
+        return;
+    }
+
+    // 3. 实时检查逻辑
+    checkInputLogic();
     
-    // 计算文本中心位置
-    const textX = button.x + button.width / 2;
-    const textY = button.y + button.height / 2;
+    // 4. 重绘界面更新输入框显示
+    // reflashScreen(); // 由主循环处理
+}
+//检查输入内容执行指令
+function checkInputLogic() {
+    // A. 检查转向指令 (up, down, left, right)
+    const directions = ["up", "down", "left", "right"];
+    if (directions.includes(userTyping)) {
+        turnTo(userTyping); // 仅转向
+        userTyping = ""; // 清空输入
+        return;
+    }
+
+    // B. 检查是否匹配当前题目的正确答案
+    let currentQuestion = questionQueue[0];
+    if (!currentQuestion) return;
     
-    ctx.fillText(button.text, textX, textY);
+    // 标准化答案比较（去除空格、转小写、去除标点）
+    let normalizedInput = normalizeInput(userTyping);
+    let normalizedAnswer = normalizeInput(currentQuestion.correctAnswer);
+    
+    if (normalizedInput === normalizedAnswer) {
+        // 答案正确 -> 向当前方向移动一格
+        moveForward();
+        
+        // 逻辑更新
+        answeredQuestions.push(currentQuestion); // 记录已完成题目
+        userTyping = "";
+        questionQueue.shift(); // 移除已完成题目
+        fillQuestionQueue();   // 补充新题目
+
+    }
+}
+
+// 标准化输入（去除首尾空格、转小写、去除标点符号，但保留空格）
+function normalizeInput(input) {
+    if (!input) return "";
+    // 去除首尾空格，转小写，去除标点符号但保留空格
+    // 然后统一空格为单个空格
+    return input.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
+}
+
+// 鼠标点击监听逻辑
+function doClick(event) {
+    // 1. 获取点击在 Canvas 上的相对坐标
+    // getBoundingClientRect() 返回 Canvas 相对于视口的位置
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    // 2. 检查点击是否在按钮范围内
+    if (isButtonClicked(clickX, clickY, buttonNext)) {
+        // 3. 触发事件
+        handleButtonNextClick(clickX,clickY);
+    }else if (isButtonClicked(clickX, clickY, buttonPre)) {
+        handleButtonPreClick(clickX,clickY);
+    }else if (isButtonClicked(clickX, clickY, buttonReset)) {
+        playSound('button_click');
+        initLevel();
+        floatingTexts.push(new FloatingText(clickX, clickY, "已重置"));
+    }
 }
 
 // 检查点击坐标是否在按钮区域内
@@ -563,7 +580,7 @@ function isButtonClicked(clickX, clickY,button) {
         clickY <= button.y + button.height
     );
 }
-
+//按钮点击事件
 function handleButtonNextClick(clickX, clickY){
     playSound('button_click');
     if (iCurlevel >= levels.length - 1) {
@@ -583,27 +600,10 @@ function handleButtonPreClick(clickX, clickY){
 
 
 
-function updateAndDrawFloatingTexts(){
-    for(let i = 0; i < floatingTexts.length; i++){
-        let ft = floatingTexts[i];
 
-        ft.y -= 1; // 向上移动
-        ft.alpha -= 0.02; // 逐渐变透明
 
-        ft.life -= 0.02; // 生命值减少
 
-        if(ft.life>0){
-            ctx.save(); // 保存当前画布状态
-            ctx.globalAlpha = ft.life; // 设置透明度
-            ctx.font = "bold 24px Arial";
-            ctx.fillStyle = ft.color;
-            ctx.textAlign = "center";
-            ctx.fillText(ft.text, ft.x, ft.y);
-            ctx.restore(); // 恢复画布状态
-        }else{
-             // 3. 如果生命值耗尽，从数组中移除
-            floatingTexts.splice(i, 1);
-            i--; // 修正索引
-        }
-    }
-}
+
+
+
+
