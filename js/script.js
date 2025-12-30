@@ -4,13 +4,13 @@
 
 // 找到canvas元素
 let canvas = document.getElementById("gameCanvas");
-let msg = document.getElementById("msg");
+let msg = document.getElementById("msg");//已废弃，原用于showmoveinfo函数显示移动信息
 let ctx = canvas.getContext("2d");
 
 //获取canvas宽度和高度
 let W = canvas.width;
 let H = canvas.height;
-let offsetX = 360; // 水平居中偏移量 (1280-560)/2 = 360
+let offsetX = 360; // 水平居中偏移量 (1280-560)/2 = 360，560为地图宽度
 let offsetY = 150; // 垂直偏移量（标题下方）
 
 let w = 35,h = 35; // 单位方块大小
@@ -31,7 +31,7 @@ let currentFacing = "down"; // 朝向
 // 天空滚动相关变量
 let skyOffset = 0;
 let SKY_VELOCITY = 30; 
-let lastTime = 0;
+let lastTime = 0;//未使用
 let fps = 60;
 
 const buttonNext = {
@@ -210,9 +210,6 @@ imgPreload(oImgs, function(images){
 // console.log("images/right.png:", images.right.complete ? "加载成功" : "加载失败");
 });
 
-//捕获用户上下左右移动
-document.addEventListener('keydown', doKeyDown);
-canvas.addEventListener('click', doClick);
 
 
 

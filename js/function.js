@@ -133,7 +133,7 @@ function DrawMap(level){
                 break;
 			case 5: pic = box; break;
 			}
-            ctx.drawImage(pic, offsetX + w*j-(pic.width-w)/2, offsetY + h*i-(pic.height-h), pic.width, pic.height);
+            ctx.drawImage(pic, offsetX + w*j-(pic.width-w)/2, offsetY + h*i-(pic.height-h), pic.width, pic.height);//一个水平居中一个让图片底贴于地板
 		}
 	}
     
@@ -163,7 +163,7 @@ function drawSky() {
         ctx.drawImage(sky2, scaledWidth, 0, scaledWidth, scaledHeight);
         ctx.drawImage(sky1, 2 * scaledWidth, 0, scaledWidth, scaledHeight);
         
-        ctx.restore();
+        ctx.restore();//save再restore重置translate导致的坐标原点改变的问题
     }
 }
 // 绘制左侧侧边栏 (题目显示 + 输入框)
@@ -253,7 +253,7 @@ function drawWrappedText(text, maxWidth, x, y, lineHeight, fontSize, color) {
     
     // 处理题目中的填空符号，确保正确分割
     // 将连续的下划线视为一个单词单位
-    let words = text.split(/(\s+)/).filter(w => w.trim().length > 0);
+    let words = text.split(/(\s+)/).filter(w => w.trim().length > 0);//括号保留空格作为分隔符
     let line = '';
     let currentY = y;
     let maxLines = 5; // 最大行数（减少以避免超出区域）
@@ -465,7 +465,7 @@ function copyArray(arr){
     var b=[];//每次移动更新地图数据都先清空再添加新的地图
     for (var i=0;i<arr.length ;i++ )
     {
-        b[i] = arr[i].concat();//链接两个数组
+        b[i] = arr[i].concat();//链接两个数组concat一次复制一行
     }
     return b;
 }
@@ -515,7 +515,7 @@ function checkFinish(){
 //键盘监听逻辑
 function doKeyDown(event){
     let key = event.key; // 获取按键字符
-    let keyCode = event.keyCode;
+    let keyCode = event.keyCode;//获取按键的键码
     playSound('typing'); // 播放打字音效
 
     // 1. 处理功能键
@@ -583,7 +583,8 @@ function normalizeInput(input) {
     if (!input) return "";
     // 去除首尾空格，转小写，去除标点符号但保留空格
     // 然后统一空格为单个空格
-    return input.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
+    return input.trim().toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');//先去除前后空格再转小写再去除大小写字母和下划线和空格之外的字符再把多个空格转为一个空格
+
 }
 
 // 鼠标点击监听逻辑
@@ -633,13 +634,3 @@ function handleButtonPreClick(clickX, clickY){
     }
     NextLevel(-1);
 }
-
-
-
-
-
-
-
-
-
-
